@@ -8,7 +8,7 @@ const config = {
 	physics: {
 		default: 'arcade',
 		arcade: {
-			gravity: {y: 0},
+			gravity: {y: 1000},
 			debug: true
 		},
 	},
@@ -44,11 +44,12 @@ function create() {
 	platforms.create(980, 500, 'wall').setScale(110,1).refreshBody();
 	platforms.create(400, 360, 'wall').setScale(1, 40).refreshBody();
 	platforms.setVisible(false);
+	this.platforms = platforms;
 
 	/* Anims for Tim */
-	this.anims.create({ key: 'walk', frames: actualFrameNames.map(frameName => ({ key: 'tim', frame: frameName })).reverse(), frameRate: 7, repeat: -1 });
+	this.anims.create({ key: 'walk', frames: actualFrameNames.map(frameName => ({ key: 'tim', frame: frameName })).reverse(), frameRate: 9, repeat: -1 });
 	this.anims.create({ key: 'stand', frames: [{ key: 'tim', frame: actualFrameNames[8] }], frameRate: 7, repeat: -1 });
-	this.anims.create({ key: 'climb', frames: [{ key: 'tim', frame: actualFrameNames[8] }, { key: 'tim', frame: actualFrameNames[8] }], frameRate: 7, repeat: -1 });
+	this.anims.create({ key: 'climb', frames: [{ key: 'tim', frame: actualFrameNames[3] }, { key: 'tim', frame: actualFrameNames[6] }], frameRate: 4, repeat: -1 });
 
 	/* TIM */
 	const tim = this.physics.add.sprite(WIDTH/2-500, HEIGHT/2-125, 'tim');
@@ -59,9 +60,15 @@ function create() {
 	tim.anims.play('stand');
 
 
+	const ladders = this.physics.add.staticGroup();
+	const frontLadder = ladders.create(1143, HEIGHT/2 - 90, 'wall').setScale(5, 45).refreshBody();
+	frontLadder.setVisible(false);
+	this.ladders = ladders;
+
+
 	/* Initializing interactives - objects in the space you can interact with */
 	const interactives = this.physics.add.staticGroup();
-	const chair = interactives.create(1400, HEIGHT/2-125, 'wall').setScale(8,18);
+	const chair = interactives.create(1400, HEIGHT/2-125, 'wall').setScale(8,18).refreshBody();
 	chair.progress = 30;
 	this.interactives = interactives;
 	interactives.setVisible(false);
@@ -79,13 +86,16 @@ function create() {
 		tooltipText.setVisible(false);
 	};
 
-	/* Physics with TIM */
-	this.physics.add.collider(tim, platforms);
+	// /* Physics with TIM */
+	// const collider =this.physics.add.collider(tim, platforms);
+	// collider.active = false
 
 	this.chair = chair;
 	this.cursors = this.input.keyboard.createCursorKeys();
 	this.player = tim;
 }
+
+let timState = "STAND";
 
 function update() {
 	const scene = this;
@@ -105,27 +115,57 @@ function update() {
 		}
 	});
 
+	let canClimb = false;
+	scene.physics.overlap(tim, this.ladders, (tim, ladders) => {
+		canClimb = true;
+	});
+
+	if (timState != 'CLIMB')
+		scene.physics.collide(tim, this.platforms);
+
+
 	let WALK_VELOCITY = 270;
+	let CLIMB_VELOCITY = 170;
+	// tim.setVelocityX(0);
+	// tim.setVelocityY(0);
+
 	if (cursors.left.isDown)
 	{
+		timState = "WALK";
 		tim.setVelocityX(-WALK_VELOCITY);
 		tim.anims.play('walk', true);
 		tim.setFlipX(true);
 	}
 	else if (cursors.right.isDown)
 	{
+		timState = "WALK";
 		tim.setVelocityX(WALK_VELOCITY);
 		tim.anims.play('walk', true);
 		tim.setFlipX(false);
 	}
+	else if (cursors.down.isDown && canClimb)
+	{
+		timState = "CLIMB";
+		tim.setVelocityY(CLIMB_VELOCITY);
+		tim.anims.play('climb', true);
+	}
+	else if (cursors.up.isDown && canClimb)
+	{
+		timState = "CLIMB";
+		tim.setVelocityY(-CLIMB_VELOCITY);
+		tim.anims.play('climb', true);
+	}
 	else
 	{
+		timState = "STAND";
 		tim.setVelocityX(0);
+		tim.setVelocityY(0);
 
 		tim.anims.play('stand');
 	}
 
 	if (cursors.space.isDown) {
+		timState = "WORK";
 		// check interactive
 		if (activeInteractive) {
 			if (activeInteractive.progress <100) {
