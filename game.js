@@ -67,16 +67,59 @@ function create() {
 	tim.anims.play('stand');
 
 
+	/* LADDERS */
 	const ladders = this.physics.add.staticGroup();
-	const frontLadder = ladders.create(1143, HEIGHT/2 - 90, 'wall').setScale(5, 45).refreshBody();
+	const frontLadder = ladders.create(1143, HEIGHT/2 - 120, 'wall').setScale(5, 30).refreshBody();
 	frontLadder.setVisible(false);
 	this.ladders = ladders;
 
 
 	/* Initializing interactives - objects in the space you can interact with */
 	const interactives = this.physics.add.staticGroup();
+
 	const chair = interactives.create(1400, HEIGHT/2-125, 'wall').setScale(8,18).refreshBody();
 	chair.progress = 30;
+	chair.interactiveName = "chair";
+	this.chair = chair;
+
+	const fuelTank = interactives.create(740, HEIGHT/2+65, 'wall').setScale(5,8).refreshBody();
+	fuelTank.progress = 30;
+	fuelTank.interactiveName = "fuel tank";
+	this.fuelTank = fuelTank;
+
+	const powerGenerator = interactives.create(940, HEIGHT/2+65, 'wall').setScale(5,8).refreshBody();
+	powerGenerator.progress = 30;
+	powerGenerator.interactiveName = "power generator";
+	this.powerGenerator = powerGenerator;
+
+	const waterSupply = interactives.create(1140, HEIGHT/2+65, 'wall').setScale(5,8).refreshBody();
+	waterSupply.progress = 30;
+	waterSupply.interactiveName = "water supply";
+	this.waterSupply = waterSupply;
+
+	// TODO: break it to timewarp to next levels
+	const spaceTimeFolder = interactives.create(1355, HEIGHT/2+65, 'wall').setScale(5,8).refreshBody();
+	spaceTimeFolder.progress = 30;
+	spaceTimeFolder.interactiveName = "space time folder";
+	this.spaceTimeFolder = spaceTimeFolder;
+
+	const o2recycler = interactives.create(1010, HEIGHT/2-265, 'wall').setScale(5,8).refreshBody();
+	o2recycler.progress = 30;
+	o2recycler.interactiveName = "O2 recycler";
+	this.o2recycler = o2recycler;
+
+	const airConditioner = interactives.create(810, HEIGHT/2-265, 'wall').setScale(5,8).refreshBody();
+	airConditioner.progress = 30;
+	airConditioner.interactiveName = "air conditioner";
+	this.airConditioner = airConditioner;
+
+	const engineTop = interactives.create(445, HEIGHT/2-265, 'wall').setScale(5,8).refreshBody();
+	engineTop.progress = 30;
+	engineTop.interactiveName = "top engine";
+	this.engineTop = engineTop;
+
+
+
 	this.interactives = interactives;
 	interactives.setVisible(false);
 
@@ -85,7 +128,7 @@ function create() {
 	tooltipText.setVisible(false);
 	this.activateTooltip = function activateTooltip(interactive) {
 		tooltipText.setVisible(true);
-		tooltipText.setText(`Broken Chair\n Repair (${interactive.progress<100 ? Math.floor(interactive.progress)+'%' : 'complete'})`);
+		tooltipText.setText(`Broken ${interactive.interactiveName}\n Repair (${interactive.progress<100 ? Math.floor(interactive.progress)+'%' : 'complete'})`);
 		tooltipText.setX(interactive.x);
 		tooltipText.setY(interactive.y - 120)
 	};
@@ -97,7 +140,6 @@ function create() {
 	// const collider =this.physics.add.collider(tim, platforms);
 	// collider.active = false
 
-	this.chair = chair;
 	this.cursors = this.input.keyboard.createCursorKeys();
 	this.player = tim;
 }
@@ -115,9 +157,10 @@ function update() {
 	let activeInteractive;
 	scene.physics.overlap(tim, interactives, (tim, interactive) => {
 		activeInteractive = interactive;
+		this.activateTooltip(interactive);
 		switch(interactive) {
 			case this.chair:
-				this.activateTooltip(interactive);
+				// this.activateTooltip(interactive);
 				break;
 		}
 	});
