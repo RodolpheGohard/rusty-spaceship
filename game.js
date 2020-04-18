@@ -35,14 +35,17 @@ function preload() {
 }
 
 const spaceshipStats = {
-	fuel: 10000,
+	fuel: 300,
 	fuelOnFloor: 0,
 	water: 2000,
 	waterOnFloor: 0,
-	pilotHealth: 100
+	pilotHealth: 100,
+	distanceLeft: 280000
 };
 
 function create() {
+	const scene = this;
+
 	this.add.image(WIDTH/2, HEIGHT/2, 'spaceship');
 
 	const actualFrameNames = Object.keys(this.anims.textureManager.get('tim').frames).slice(1);
@@ -144,6 +147,10 @@ function create() {
 		tooltipText.setVisible(false);
 	};
 
+	// HUD
+	this.hud = this.add.text(0, 0, '-', { font: '25px Courier', fill: 'white', backgroundColor: 'black' });
+
+
 	// /* Physics with TIM */
 	// const collider =this.physics.add.collider(tim, platforms);
 	// collider.active = false
@@ -182,7 +189,7 @@ function update() {
 		spaceshipStats.fuel -= delta * FUEL_CONSUMPTION;
 
 		let FUEL_WASTE_RATE = 3;
-		let fuelWaste = delta * (1 - +this.fuelTank.progress/100) * FUEL_WASTE_RATE ;
+		let fuelWaste = delta * (1 - +scene.fuelTank.progress/100) * FUEL_WASTE_RATE ;
 		spaceshipStats.fuel -= fuelWaste;
 		spaceshipStats.fuelOnFloor += delta * fuelWaste;
 		let FUEL_EVAPORATION_EXP = 1.023373892; // exp( -ln(1/2)/30 )
@@ -193,15 +200,20 @@ function update() {
 		// TODO: If too few fuel, crash landing
 
 		let WATER_WASTE_RATE = 3;
-		let waterWaste = delta * (1 - +this.waterSupply.progress/100) * WATER_WASTE_RATE;
+		let waterWaste = delta * (1 - +scene.waterSupply.progress/100) * WATER_WASTE_RATE;
 		spaceshipStats.water -= waterWaste;
+
+		spaceshipStats.distanceLeft -= 1119*(scene.engineTop.progress/100)*delta;
 	}
+	updateSpaceshipStats();
 
 	function createAlert(interactive) {
 		// TODO: implement me
 		console.log('shit happens for ', interactive);
 		if (!interactive.alert) {
 			interactive.alert = scene.add.text(interactive.x, interactive.y, '⚠️', { font: '25px Courier', fill: 'red', backgroundColor: 'yellow' }); //thats an emoji
+		} else {
+			interactive.alert.setVisible(true);
 		}
 	}
 
@@ -307,7 +319,7 @@ function update() {
 			if (activeInteractive.progress <100) {
 				activeInteractive.progress += .5;
 			} else {
-				activeInteractive.alert && activeInteractive.alert.destroy();
+				activeInteractive.alert && activeInteractive.alert.setVisible(false);
 			}
 		}
 		// Make progess on interactive
@@ -317,6 +329,16 @@ function update() {
 	// {
 	// 	tim.setVelocityY(-330);
 	// }
+
+	function updateHud() {
+		scene.hud.setText(
+`FUEL: ${Math.floor(spaceshipStats.fuel)}
+WATER: ${Math.floor(spaceshipStats.water)}
+PILOT: ${spaceshipStats.pilotHealth}
+DISTANCE: ${Math.floor(spaceshipStats.distanceLeft)}`
+		);
+	}
+	updateHud();
 
 	tim.body.debugShowBody = true;
 
