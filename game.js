@@ -9,7 +9,7 @@ const config = {
 		default: 'arcade',
 		arcade: {
 			gravity: {y: 1000},
-			debug: true
+			debug: false
 		},
 	},
 	scale: {
@@ -33,6 +33,14 @@ function preload() {
 	this.load.image('wall', 'assets/wall.png');
 	this.load.multiatlas('tim', 'assets/tim/tim.json', 'assets/tim');
 }
+
+const spaceshipStats = {
+	fuel: 10000,
+	fuelOnFloor: 0,
+	water: 2000,
+	waterOnFloor: 0,
+	pilotHealth: 100
+};
 
 function create() {
 	this.add.image(WIDTH/2, HEIGHT/2, 'spaceship');
@@ -78,43 +86,43 @@ function create() {
 	const interactives = this.physics.add.staticGroup();
 
 	const chair = interactives.create(1400, HEIGHT/2-125, 'wall').setScale(8,18).refreshBody();
-	chair.progress = 30;
+	chair.progress = 100;
 	chair.interactiveName = "chair";
 	this.chair = chair;
 
 	const fuelTank = interactives.create(740, HEIGHT/2+65, 'wall').setScale(5,8).refreshBody();
-	fuelTank.progress = 30;
+	fuelTank.progress = 100;
 	fuelTank.interactiveName = "fuel tank";
 	this.fuelTank = fuelTank;
 
 	const powerGenerator = interactives.create(940, HEIGHT/2+65, 'wall').setScale(5,8).refreshBody();
-	powerGenerator.progress = 30;
+	powerGenerator.progress = 100;
 	powerGenerator.interactiveName = "power generator";
 	this.powerGenerator = powerGenerator;
 
 	const waterSupply = interactives.create(1140, HEIGHT/2+65, 'wall').setScale(5,8).refreshBody();
-	waterSupply.progress = 30;
+	waterSupply.progress = 100;
 	waterSupply.interactiveName = "water supply";
 	this.waterSupply = waterSupply;
 
 	// TODO: break it to timewarp to next levels
 	const spaceTimeFolder = interactives.create(1355, HEIGHT/2+65, 'wall').setScale(5,8).refreshBody();
-	spaceTimeFolder.progress = 30;
+	spaceTimeFolder.progress = 100;
 	spaceTimeFolder.interactiveName = "space time folder";
 	this.spaceTimeFolder = spaceTimeFolder;
 
 	const o2recycler = interactives.create(1010, HEIGHT/2-265, 'wall').setScale(5,8).refreshBody();
-	o2recycler.progress = 30;
+	o2recycler.progress = 100;
 	o2recycler.interactiveName = "O2 recycler";
 	this.o2recycler = o2recycler;
 
 	const airConditioner = interactives.create(810, HEIGHT/2-265, 'wall').setScale(5,8).refreshBody();
-	airConditioner.progress = 30;
+	airConditioner.progress = 100;
 	airConditioner.interactiveName = "air conditioner";
 	this.airConditioner = airConditioner;
 
 	const engineTop = interactives.create(445, HEIGHT/2-265, 'wall').setScale(5,8).refreshBody();
-	engineTop.progress = 30;
+	engineTop.progress = 100;
 	engineTop.interactiveName = "top engine";
 	this.engineTop = engineTop;
 
@@ -164,6 +172,84 @@ function update() {
 				break;
 		}
 	});
+
+
+	const delta = 1/60; // in sec, Shit Phaser and its shitty doc, can't find it, so setting constant from 60hz
+
+	function updateSpaceshipStats() {
+		// fuel
+		let FUEL_CONSUMPTION = 1;
+		spaceshipStats.fuel -= delta * FUEL_CONSUMPTION;
+
+		let FUEL_WASTE_RATE = 3;
+		let fuelWaste = delta * (1 - +this.fuelTank.progress/100) * FUEL_WASTE_RATE ;
+		spaceshipStats.fuel -= fuelWaste;
+		spaceshipStats.fuelOnFloor += delta * fuelWaste;
+		let FUEL_EVAPORATION_EXP = 1.023373892; // exp( -ln(1/2)/30 )
+		spaceshipStats.fuelOnFloor = Math.max( Math.pow(FUEL_EVAPORATION_EXP, -delta) -1, 0 );
+
+		// TODO: If too much fuel on the floor, explosion
+
+		// TODO: If too few fuel, crash landing
+
+		let WATER_WASTE_RATE = 3;
+		let waterWaste = delta * (1 - +this.waterSupply.progress/100) * WATER_WASTE_RATE;
+		spaceshipStats.water -= waterWaste;
+	}
+
+	function createAlert(interactive) {
+		// TODO: implement me
+		console.log('shit happens for ', interactive);
+		if (!interactive.alert) {
+			interactive.alert = scene.add.text(interactive.x, interactive.y, '⚠️', { font: '25px Courier', fill: 'red', backgroundColor: 'yellow' }); //thats an emoji
+		}
+	}
+
+	function catastrophe(interactive) {
+		if (!interactive) {
+			console.error("bad interactive");
+			return;
+		}
+
+		// set damage
+		interactive.progress = 30;
+
+		// pop alert
+		createAlert(interactive)
+	}
+
+	function runCatastrophePlanner() {
+		let lastEvent;
+
+		/* probabilities for each interactive to fail, in one second */
+		const probabilities = {
+			fuelTank: 1/120,
+			chair: 1/40,
+			o2recycler: 1/200,
+			powerGenerator: 1/100,
+			engineTop: 1/60
+		};
+		const now = new Date;
+
+		let CATASTROPHE_CHAIN_DELAY = 3000;
+		if (!lastEvent || (now.getTime() - lastEvent.getTime()) > CATASTROPHE_CHAIN_DELAY ) {
+			for (let eventable of Object.keys(probabilities)) {
+				// run a simulation
+				const probability = probabilities[eventable] * delta;
+				let KARMA = 3;
+				const itsHappening = Math.random() > 1 - probability*KARMA;
+
+				if (itsHappening) {
+					console.log('its happening ! ', eventable, ' breaks');
+					lastEvent = now;
+					catastrophe(scene[eventable]);
+					break;
+				}
+			}
+		}
+	}
+
+	runCatastrophePlanner();
 
 	let canClimb = false;
 	scene.physics.overlap(tim, this.ladders, (tim, ladders) => {
@@ -220,6 +306,8 @@ function update() {
 		if (activeInteractive) {
 			if (activeInteractive.progress <100) {
 				activeInteractive.progress += .5;
+			} else {
+				activeInteractive.alert && activeInteractive.alert.destroy();
 			}
 		}
 		// Make progess on interactive
