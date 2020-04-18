@@ -41,8 +41,15 @@ function create() {
 
 	/* Creatings walls and platforms on the plane */
 	const platforms = this.physics.add.staticGroup();
-	platforms.create(980, 500, 'wall').setScale(110,1).refreshBody();
-	platforms.create(400, 360, 'wall').setScale(1, 40).refreshBody();
+	// grounds
+	platforms.create(950, 120, 'wall').setScale(110,1).refreshBody();
+	platforms.create(950, 310, 'wall').setScale(110,1).refreshBody();
+	platforms.create(950, 500, 'wall').setScale(110,1).refreshBody();
+	platforms.create(950, 690, 'wall').setScale(110,1).refreshBody();
+	// walls
+	platforms.create(400, 360, 'wall').setScale(1, 80).refreshBody();
+	platforms.create(1460, 360, 'wall').setScale(1, 80).refreshBody();
+	platforms.create(1220, 160, 'wall').setScale(1, 30).refreshBody();
 	platforms.setVisible(false);
 	this.platforms = platforms;
 
