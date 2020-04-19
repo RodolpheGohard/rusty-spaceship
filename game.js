@@ -1,3 +1,5 @@
+import * as motorSoundPackage from "./lib/motor-sound.js"
+
 let WIDTH = 1920;
 let HEIGHT = 1080;
 
@@ -25,6 +27,29 @@ const config = {
 		update: update
 	}
 };
+
+let motorSound;
+document.addEventListener('click',  () => {
+	if (motorSound) {
+		return;
+	}
+	var AudioContext = window.AudioContext || window.webkitAudioContext;
+	var context = new AudioContext();
+	var generators = [
+		new MotorSound.NoiseGenerator(),
+		new MotorSound.LinearGenerator()
+	];
+	motorSound = new MotorSound(context, generators[0]);
+	window.motorSound = motorSound;
+	function regenerateSound() {
+		motorSound.regenerate();
+		motorSound.start();
+	}
+	regenerateSound();
+
+	motorSound.setSpeed(.32);
+	motorSound.setVolume(.2);
+});
 
 const game = new Phaser.Game(config);
 
@@ -236,6 +261,35 @@ function update() {
 		spaceshipStats.distanceLeft -= 1119*(scene.engineTop.progress/100)*delta;
 	}
 	updateSpaceshipStats();
+
+	function updateEngineParticles() {
+		// scene.engineTop.particles.setSpeed(400 * scene.engineTop.progress/100);
+		scene.engineTop.particles.setSpeed({ min: 200* scene.engineTop.progress/100, max: 600* scene.engineTop.progress/100 });
+		scene.engineTop.particles.setScale({ start: 2+5* scene.engineTop.progress/100, end: 0 });
+		// scene.engineTop.particles.setTint(0xff6666)
+		// scene.engineTop.particles.setLifespan(1000 * scene.engineTop.progress/100);
+	}
+	updateEngineParticles();
+
+
+	function updateEngineSound() {
+		if (!motorSound) {
+			// audio context and stuff may not be initialized - chrome forbids it without user interaction
+			return;
+		}
+		motorSound.setSpeed(.52*scene.engineTop.progress/100);
+		let distance = Math.max(1, Phaser.Math.Distance.Between(tim.x, tim.y, scene.engineTop.x, scene.engineTop.y)/50);
+		if (distance > 10 ) {
+			motorSound.stop();
+		} else {
+			motorSound.start();
+		}
+		let volume = .2*(1/(distance*distance));
+		motorSound.setVolume(volume );
+		console.log(volume, distance);
+	}
+	updateEngineSound();
+
 
 	function createAlert(interactive) {
 		// TODO: implement me
