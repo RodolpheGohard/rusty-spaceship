@@ -48,10 +48,24 @@ class MainGameScene extends Phaser.Scene {
 		this.load.image('wall', 'assets/wall.png');
 		this.load.image('pilot', 'assets/pilot.png');
 		this.load.multiatlas('tim', 'assets/tim/tim.json', 'assets/tim');
+
+		this.load.audio('rusty-spaceship', ['assets/JohnDuff - Rusty Spaceship (original).mp3'/*, 'assets/audio/bodenstaendig_2000_in_rock_4bit.ogg'*/]);
 	}
 
 	create() {
 		const scene = this;
+
+		const music = scene.sound.add('rusty-spaceship', {
+			mute: false,
+			volume: 1,
+			rate: 1,
+			detune: 0,
+			seek: 0,
+			loop: true,
+			delay: 0
+		});
+
+		// music.play();
 
 		const spaceship = this.add.image(WIDTH/2, HEIGHT/2, 'spaceship');
 
