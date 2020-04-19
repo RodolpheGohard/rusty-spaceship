@@ -1,5 +1,8 @@
 import {spaceshipStats} from "./maingamescene.js";
 
+const numberFormat = new Intl.NumberFormat('en-Us', { style: 'decimal', maximumFractionDigits: 0, useGrouping: true })
+const oxygenNumberFormat = new Intl.NumberFormat('en-Us', { style: 'decimal', maximumFractionDigits: 1, useGrouping: true })
+
 export default class HudScene extends Phaser.Scene {
 
 	constructor() {
@@ -42,11 +45,11 @@ export default class HudScene extends Phaser.Scene {
 		this.updateGoals();
 
 		this.hud.setText(
-			`FUEL: ${Math.floor(spaceshipStats.fuel)}
-WATER: ${Math.floor(spaceshipStats.water)}
-O2: ${Math.floor(spaceshipStats.o2)}
+			`FUEL: ${numberFormat.format(spaceshipStats.fuel)}
+WATER: ${numberFormat.format(spaceshipStats.water)}
+O2: ${oxygenNumberFormat.format(spaceshipStats.o2)}
 PILOT: ${spaceshipStats.pilotHealth}
-DISTANCE: ${Math.floor(spaceshipStats.distanceLeft)}`
+DISTANCE: ${numberFormat.format(spaceshipStats.distanceLeft)}`
 		);
 	}
 
