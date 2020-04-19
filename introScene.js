@@ -22,22 +22,25 @@ export default class IntroScene extends Phaser.Scene {
 
 	create() {
 		this.subtitle = this.add.text(1000, 700, this.storylines[this.currentStoryLine], {font: '45px Courier', fill: 'white', backgroundColor: 'black'}).setOrigin(0.5);
+		this.presEsc = this.add.text(1000, 800, 'esc to skip', {font: '30px Courier', fill: 'white', backgroundColor: 'black'}).setOrigin(0.5);
 
 		// this.cursors = this.input.keyboard.createCursorKeys();
 		this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+		this.escape = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
 	}
 
 	update(time, delta) {
 		if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
 			this.currentStoryLine ++;
-			if (this.currentStoryLine >= this.storylines.length) {
-				this.scene.start('GameScene');
-				this.scene.start('HudScene');
+		}
 
-				this.scene.stop();
-			} else {
-				this.subtitle.setText(this.storylines[this.currentStoryLine])
-			}
+		if (Phaser.Input.Keyboard.JustDown(this.escape) || this.currentStoryLine >= this.storylines.length) {
+			this.scene.start('GameScene');
+			this.scene.start('HudScene');
+
+			this.scene.stop();
+		} else {
+			this.subtitle.setText(this.storylines[this.currentStoryLine])
 		}
 
 		// if (this.cursors.space.isDown) {
