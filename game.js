@@ -291,6 +291,37 @@ function update() {
 	}
 	updateSpaceshipStats();
 
+	function updateGoals() {
+		if (spaceshipStats.o2 < 15) {
+			// TODO raise oxygen alert
+		}
+		if (spaceshipStats.o2 < 10) {
+			// TODO faint pilot
+		}
+		const FUEL_ALERT_THRESHOLD = 500;
+		if (spaceshipStats.fuel < FUEL_ALERT_THRESHOLD) {
+			// TODO: low fuel alert
+		}
+		if (spaceshipStats.fuel <= 0) {
+			// TODO: out of fuel
+		}
+		if (spaceshipStats.distanceLeft <= 500) {
+			// TODO: landing sequence
+		}
+		if (spaceshipStats.fuelOnFloor > 100) {
+			// TODO: raise fuel spill warning
+		}
+		if (spaceshipStats.fuelOnFloor > 200) {
+			// TODO: fuel explodes
+		}
+		if (spaceshipStats.water === 0) {
+			// TODO: start thrist damage
+		}
+
+
+	}
+	updateGoals();
+
 	function updateEngineParticles() {
 		const particleEmitter = scene.engineTop.particlesEmitter;
 		if (thrust == 0) {
