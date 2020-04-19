@@ -24,12 +24,13 @@ document.addEventListener('click',  () => {
 	motorSound.setVolume(.2);
 });
 
-const spaceshipStats = {
-	fuel: 30,
+export const spaceshipStats = {
+	fuel: 3000,
 	fuelOnFloor: 0,
 	water: 2000,
 	waterOnFloor: 0,
 	pilotHealth: 100,
+	pilotDeviation: 0,
 	distanceLeft: 280000,
 	o2: 20
 };
@@ -88,6 +89,7 @@ class MainGameScene extends Phaser.Scene {
 		pilot.disableBody(true);
 		pilot.setScale(0.1); //.refreshBody();
 		// pilot.enableBody();
+		this.pilot = pilot;
 
 
 		/* LADDERS */
@@ -238,6 +240,7 @@ class MainGameScene extends Phaser.Scene {
 
 		const FUEL_CONSUMPTION = 1;
 		const FUEL_WASTE_RATE = 3;
+
 		function updateSpaceshipStats() {
 			// fuel
 			if (spaceshipStats.fuel > 0) {
@@ -260,20 +263,28 @@ class MainGameScene extends Phaser.Scene {
 			let waterWaste = delta * (1 - +scene.waterSupply.progress/100) * WATER_WASTE_RATE;
 			spaceshipStats.water -= waterWaste;
 
-			spaceshipStats.distanceLeft -= 1119*getEnginesThrust()*delta;
+			spaceshipStats.distanceLeft -= 1119*getEnginesThrust()*delta*Math.cos(spaceshipStats.pilotDeviation);
 
 			let o2increaseRate = (scene.o2recycler.progress*.3/35 - (65*0.3/35));
 			spaceshipStats.o2 = Math.min(Math.max( spaceshipStats.o2 + o2increaseRate * delta, 0), 20);
+
+
+			if (this.pilot.hasFainted || this.pilot.isDead) {
+				spaceshipStats.pilotDeviation += -.03*delta;
+			} else if (spaceshipStats.pilotDeviation != 0) {
+				spaceshipStats.pilotDeviation %= 2*Math.PI;
+				spaceshipStats.pilotDeviation += -Math.sign(Math.sin(spaceshipStats.pilotDeviation))*.1*delta;
+			}
 		}
-		updateSpaceshipStats();
+		updateSpaceshipStats.call(this);
 
 		function updateGoals() {
 			if (spaceshipStats.o2 < 10) {
-				// TODO faint pilot
+				this.pilot.hasFainted = true;
+				spaceshipStats.pilotHealth = 50;
 			}
-			const FUEL_ALERT_THRESHOLD = 500;
-			if (spaceshipStats.fuel < FUEL_ALERT_THRESHOLD) {
-				// TODO: low fuel alert
+			if (spaceshipStats.o2 > 15) {
+				this.pilot.hasFainted = false;
 			}
 
 			if (spaceshipStats.fuel <= 0) {
@@ -295,8 +306,8 @@ class MainGameScene extends Phaser.Scene {
 		updateGoals.call(this);
 
 
-		}
-		updateGoals();
+		// updateCamera
+		this.cameras.main.setRotation(spaceshipStats.pilotDeviation);
 
 		function updateEngineParticles() {
 			const particleEmitter = scene.engineTop.particlesEmitter;
