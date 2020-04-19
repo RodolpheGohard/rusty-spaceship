@@ -55,6 +55,7 @@ const game = new Phaser.Game(config);
 
 function preload() {
 	this.load.image('spaceship', 'assets/spaceship.png');
+	this.load.image('engine', 'assets/engine.png');
 	this.load.image('wall', 'assets/wall.png');
 	this.load.image('pilot', 'assets/pilot.png');
 	this.load.multiatlas('tim', 'assets/tim/tim.json', 'assets/tim');
@@ -157,26 +158,34 @@ function create() {
 	airConditioner.interactiveName = "air conditioner";
 	this.airConditioner = airConditioner;
 
-	const engineTop = interactives.create(445, HEIGHT/2-265, 'wall').setScale(5,8).refreshBody();
-	engineTop.progress = 100;
-	engineTop.interactiveName = "top engine";
-	this.engineTop = engineTop;
 
-	const particles = this.add.particles('wall');
-	const particlesEmitter = particles.createEmitter({
-		// frame: 'blue',
-		x: 300,
-		y: HEIGHT/2-325,
-		lifespan: 700,
-		speed: { min: 200, max: 600 },
-		rotate: { onEmit: function () { return Math.random()*360; } },
-		angle: 180,
-		// gravityY: 300,
-		scale: { start: 7, end: 0 },
-		quantity: 1,
-		blendMode: 'ADD'
-	});
-	engineTop.particles = particlesEmitter;
+	function createEngine(x, y, name, text) {
+		const engineTop = interactives.create(x+50, y, 'wall').setScale(5,8).refreshBody();
+		const engineSprite = scene.add.sprite(x, y, 'engine');
+		engineTop.progress = 100;
+		engineTop.interactiveName = text;
+		scene[name] = engineTop;
+
+		const particles = scene.add.particles('wall');
+		const particlesEmitter = particles.createEmitter({
+			// frame: 'blue',
+			x: x - 115,
+			y: y, //- 60,
+			lifespan: 700,
+			speed: { min: 200, max: 600 },
+			rotate: { onEmit: function () { return Math.random()*360; } },
+			angle: 180,
+			// gravityY: 300,
+			scale: { start: 7, end: 0 },
+			quantity: 1,
+			blendMode: 'ADD'
+		});
+		engineTop.particlesEmitter = particlesEmitter;
+		engineTop.particles = particles;
+	}
+	createEngine(415, HEIGHT/2-315, 'engineTop',"top engine");
+	createEngine(415, HEIGHT/2-120, 'engineMiddle',"middle engine");
+	createEngine(415, HEIGHT/2+75, 'engineBottom',"bottom engine");
 
 	this.interactives = interactives;
 	interactives.setVisible(false);
@@ -205,7 +214,7 @@ function create() {
 		return l & ~cam.id;
 	}
 	this.hud.cameraFilter = setCamera(hudCam);
-	hudCam.ignore([spaceship, tim, interactives, platforms, particles]); // Ignore everything but hud, unfortunately phaser hasn't though this through, it seems ...
+	hudCam.ignore([spaceship, tim, interactives, platforms, scene.engineTop.particles]); // Ignore everything but hud, unfortunately phaser hasn't though this through, it seems ...
 
 
 	// /* Physics with TIM */
@@ -246,15 +255,24 @@ function update() {
 
 	const delta = 1/60; // in sec, Shit Phaser and its shitty doc, can't find it, so setting constant from 60hz
 
+	function getEnginesThrust() {
+		return spaceshipStats.fuel>0 ? (scene.engineTop.progress / 100) : 0;
+	}
+	const thrust = getEnginesThrust();
+
+	const FUEL_CONSUMPTION = 1;
+	const FUEL_WASTE_RATE = 3;
 	function updateSpaceshipStats() {
 		// fuel
-		let FUEL_CONSUMPTION = 1;
-		spaceshipStats.fuel -= delta * FUEL_CONSUMPTION;
+		if (spaceshipStats.fuel > 0) {
+			spaceshipStats.fuel -= delta * FUEL_CONSUMPTION;
+			let fuelWaste = delta * (1 - +scene.fuelTank.progress/100) * FUEL_WASTE_RATE ;
+			spaceshipStats.fuel -= fuelWaste;
+			spaceshipStats.fuelOnFloor += delta * fuelWaste;
+		} else {
+			// TODO: trigger out of fuel alert
+		}
 
-		let FUEL_WASTE_RATE = 3;
-		let fuelWaste = delta * (1 - +scene.fuelTank.progress/100) * FUEL_WASTE_RATE ;
-		spaceshipStats.fuel -= fuelWaste;
-		spaceshipStats.fuelOnFloor += delta * fuelWaste;
 		let FUEL_EVAPORATION_EXP = 1.023373892; // exp( -ln(1/2)/30 )
 		spaceshipStats.fuelOnFloor = Math.max( Math.pow(FUEL_EVAPORATION_EXP, -delta) -1, 0 );
 
@@ -266,7 +284,7 @@ function update() {
 		let waterWaste = delta * (1 - +scene.waterSupply.progress/100) * WATER_WASTE_RATE;
 		spaceshipStats.water -= waterWaste;
 
-		spaceshipStats.distanceLeft -= 1119*(scene.engineTop.progress/100)*delta;
+		spaceshipStats.distanceLeft -= 1119*getEnginesThrust()*delta;
 
 		let o2increaseRate = (scene.o2recycler.progress*.3/35 - (65*0.3/35));
 		spaceshipStats.o2 = Math.min(Math.max( spaceshipStats.o2 + o2increaseRate * delta, 0), 20);
@@ -274,11 +292,16 @@ function update() {
 	updateSpaceshipStats();
 
 	function updateEngineParticles() {
-		// scene.engineTop.particles.setSpeed(400 * scene.engineTop.progress/100);
-		scene.engineTop.particles.setSpeed({ min: 200* scene.engineTop.progress/100, max: 600* scene.engineTop.progress/100 });
-		scene.engineTop.particles.setScale({ start: 2+5* scene.engineTop.progress/100, end: 0 });
-		// scene.engineTop.particles.setTint(0xff6666)
-		// scene.engineTop.particles.setLifespan(1000 * scene.engineTop.progress/100);
+		const particleEmitter = scene.engineTop.particlesEmitter;
+		if (thrust == 0) {
+			// scene.engineTop.particlesEmitter.setQuantity(0);
+			particleEmitter.stop();
+		}
+		// scene.engineTop.particlesEmitter.setSpeed(400 * scene.engineTop.progress/100);
+		particleEmitter.setSpeed({ min: 200* thrust, max: 600* scene.engineTop.progress/100 });
+		particleEmitter.setScale({ start: 2+5* thrust, end: 0 });
+		// scene.engineTop.particlesEmitter.setTint(0xff6666)
+		// scene.engineTop.particlesEmitter.setLifespan(1000 * scene.engineTop.progress/100);
 	}
 	updateEngineParticles();
 
@@ -288,9 +311,9 @@ function update() {
 			// audio context and stuff may not be initialized - chrome forbids it without user interaction
 			return;
 		}
-		motorSound.setSpeed(.52*scene.engineTop.progress/100);
+		motorSound.setSpeed(.52*thrust);
 		let distance = Math.max(1, Phaser.Math.Distance.Between(tim.x, tim.y, scene.engineTop.x, scene.engineTop.y)/50);
-		if (distance > 10 ) {
+		if (distance > 10 || thrust == 0) {
 			motorSound.stop();
 		} else {
 			motorSound.start();
