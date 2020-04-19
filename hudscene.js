@@ -6,7 +6,7 @@ const oxygenNumberFormat = new Intl.NumberFormat('en-Us', { style: 'decimal', ma
 export default class HudScene extends Phaser.Scene {
 
 	constructor() {
-		super({key: 'HudScene', active: true});
+		super({key: 'HudScene', active: false});
 
 		this.score = 0;
 	}

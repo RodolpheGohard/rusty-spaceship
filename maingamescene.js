@@ -128,10 +128,10 @@ class MainGameScene extends Phaser.Scene {
 		spaceTimeFolder.interactiveName = "space time folder";
 		this.spaceTimeFolder = spaceTimeFolder;
 
-		const o2recycler = interactives.create(1010, HEIGHT/2-265, 'wall').setScale(5,8).refreshBody();
-		o2recycler.progress = 100;
-		o2recycler.interactiveName = "O2 recycler";
-		this.o2recycler = o2recycler;
+		const o2Recycler = interactives.create(1010, HEIGHT/2-265, 'wall').setScale(5,8).refreshBody();
+		o2Recycler.progress = 100;
+		o2Recycler.interactiveName = "O2 recycler";
+		this.o2Recycler = o2Recycler;
 
 		const airConditioner = interactives.create(810, HEIGHT/2-265, 'wall').setScale(5,8).refreshBody();
 		airConditioner.progress = 100;
@@ -149,7 +149,7 @@ class MainGameScene extends Phaser.Scene {
 			const particles = scene.add.particles('wall');
 			const particlesEmitter = particles.createEmitter({
 				// frame: 'blue',
-				x: x - 115,
+				x: x - 95,
 				y: y, //- 60,
 				lifespan: 700,
 				speed: { min: 200, max: 600 },
@@ -265,7 +265,7 @@ class MainGameScene extends Phaser.Scene {
 
 			spaceshipStats.distanceLeft -= 1119*getEnginesThrust()*delta*Math.cos(spaceshipStats.pilotDeviation);
 
-			let o2increaseRate = (scene.o2recycler.progress*.3/35 - (65*0.3/35));
+			let o2increaseRate = (scene.o2Recycler.progress*.3/35 - (65*0.3/35));
 			spaceshipStats.o2 = Math.min(Math.max( spaceshipStats.o2 + o2increaseRate * delta, 0), 20);
 
 
@@ -373,7 +373,7 @@ class MainGameScene extends Phaser.Scene {
 			const probabilities = {
 				fuelTank: 1/120,
 				chair: 1/40,
-				o2recycler: 1/200,
+				o2Recycler: 1/200,
 				powerGenerator: 1/100,
 				engineTop: 1/60
 			};
