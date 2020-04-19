@@ -182,17 +182,17 @@ class MainGameScene extends Phaser.Scene {
 		};
 
 		// HUD
-		const hudCam = this.cameras.add(0,0,350,200);
-		const hud = this.hud = this.add.text(0, 0, '-', { font: '25px Courier', fill: 'white', backgroundColor: 'black' });
-		const camList = this.cameras.cameras;
-		function setCamera(cam) {
-
-			let l = (1 << camList.length) - 1;
-
-			return l & ~cam.id;
-		}
-		this.hud.cameraFilter = setCamera(hudCam);
-		hudCam.ignore([spaceship, tim, interactives, platforms, scene.engineTop.particles]); // Ignore everything but hud, unfortunately phaser hasn't though this through, it seems ...
+		// const hudCam = this.cameras.add(0,0,350,200);
+		// const hud = this.hud = this.add.text(0, 0, '-', { font: '25px Courier', fill: 'white', backgroundColor: 'black' });
+		// const camList = this.cameras.cameras;
+		// function setCamera(cam) {
+		//
+		// 	let l = (1 << camList.length) - 1;
+		//
+		// 	return l & ~cam.id;
+		// }
+		// this.hud.cameraFilter = setCamera(hudCam);
+		// hudCam.ignore([spaceship, tim, interactives, platforms, scene.engineTop.particles]); // Ignore everything but hud, unfortunately phaser hasn't though this through, it seems ...
 
 
 		// /* Physics with TIM */
@@ -206,7 +206,7 @@ class MainGameScene extends Phaser.Scene {
 		// this.cameras.main.setBounds(0, 0, 800, 400);
 		this.cameras.main.zoom = 1.5;
 		this.cameras.main.startFollow(tim);
-		this.cameras.main.ignore(hud);
+		// this.cameras.main.ignore(hud);
 	}
 
 	update(time, deltaMs) {
@@ -268,9 +268,6 @@ class MainGameScene extends Phaser.Scene {
 		updateSpaceshipStats();
 
 		function updateGoals() {
-			if (spaceshipStats.o2 < 15) {
-				// TODO raise oxygen alert
-			}
 			if (spaceshipStats.o2 < 10) {
 				// TODO faint pilot
 			}
@@ -278,6 +275,7 @@ class MainGameScene extends Phaser.Scene {
 			if (spaceshipStats.fuel < FUEL_ALERT_THRESHOLD) {
 				// TODO: low fuel alert
 			}
+
 			if (spaceshipStats.fuel <= 0) {
 				// TODO: out of fuel
 			}
@@ -293,6 +291,8 @@ class MainGameScene extends Phaser.Scene {
 			if (spaceshipStats.water === 0) {
 				// TODO: start thrist damage
 			}
+		}
+		updateGoals.call(this);
 
 
 		}
@@ -455,16 +455,16 @@ class MainGameScene extends Phaser.Scene {
 		// 	tim.setVelocityY(-330);
 		// }
 
-		function updateHud() {
-			scene.hud.setText(
-				`FUEL: ${Math.floor(spaceshipStats.fuel)}
-WATER: ${Math.floor(spaceshipStats.water)}
-O2: ${Math.floor(spaceshipStats.o2)}
-PILOT: ${spaceshipStats.pilotHealth}
-DISTANCE: ${Math.floor(spaceshipStats.distanceLeft)}`
-			);
-		}
-		updateHud();
+// 		function updateHud() {
+// 			scene.hud.setText(
+// 				`FUEL: ${Math.floor(spaceshipStats.fuel)}
+// WATER: ${Math.floor(spaceshipStats.water)}
+// O2: ${Math.floor(spaceshipStats.o2)}
+// PILOT: ${spaceshipStats.pilotHealth}
+// DISTANCE: ${Math.floor(spaceshipStats.distanceLeft)}`
+// 			);
+// 		}
+// 		updateHud();
 
 		tim.body.debugShowBody = true;
 

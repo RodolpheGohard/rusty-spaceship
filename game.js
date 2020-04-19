@@ -1,6 +1,7 @@
 import * as motorSoundPackage from "./lib/motor-sound.js"
 import MainGameScene from "./maingamescene.js";
 import {HEIGHT, WIDTH} from "./constants.js";
+import HudScene from "./hudscene.js";
 
 
 const config = {
@@ -21,7 +22,7 @@ const config = {
 		// width: 640,
 		// height: 960
 	},
-	scene: [MainGameScene]
+	scene: [MainGameScene, HudScene]
 	// scene: {
 	// 	preload: preload,
 	// 	create: create,
