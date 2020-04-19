@@ -43,7 +43,7 @@ document.addEventListener('click',  () => {
 	window.motorSound = motorSound;
 	function regenerateSound() {
 		motorSound.regenerate();
-		motorSound.start();
+		// motorSound.start();
 	}
 	regenerateSound();
 
@@ -65,7 +65,8 @@ const spaceshipStats = {
 	water: 2000,
 	waterOnFloor: 0,
 	pilotHealth: 100,
-	distanceLeft: 280000
+	distanceLeft: 280000,
+	o2: 20
 };
 
 function create() {
@@ -259,6 +260,9 @@ function update() {
 		spaceshipStats.water -= waterWaste;
 
 		spaceshipStats.distanceLeft -= 1119*(scene.engineTop.progress/100)*delta;
+
+		let o2increaseRate = (scene.o2recycler.progress*.3/35 - (65*0.3/35));
+		spaceshipStats.o2 = Math.min(Math.max( spaceshipStats.o2 + o2increaseRate * delta, 0), 20);
 	}
 	updateSpaceshipStats();
 
@@ -286,7 +290,7 @@ function update() {
 		}
 		let volume = .2*(1/(distance*distance));
 		motorSound.setVolume(volume );
-		console.log(volume, distance);
+		// console.log(volume, distance);
 	}
 	updateEngineSound();
 
@@ -336,7 +340,7 @@ function update() {
 				const itsHappening = Math.random() > 1 - probability*KARMA;
 
 				if (itsHappening) {
-					console.log('its happening ! ', eventable, ' breaks');
+					// console.log('its happening ! ', eventable, ' breaks');
 					lastEvent = now;
 					catastrophe(scene[eventable]);
 					break;
@@ -418,6 +422,7 @@ function update() {
 		scene.hud.setText(
 `FUEL: ${Math.floor(spaceshipStats.fuel)}
 WATER: ${Math.floor(spaceshipStats.water)}
+O2: ${Math.floor(spaceshipStats.o2)}
 PILOT: ${spaceshipStats.pilotHealth}
 DISTANCE: ${Math.floor(spaceshipStats.distanceLeft)}`
 		);
