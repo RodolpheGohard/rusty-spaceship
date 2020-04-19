@@ -5,6 +5,7 @@ import {HEIGHT, WIDTH} from "./constants.js";
 import HudScene from "./hudscene.js";
 import TitleScene from "./titleScene.js";
 import IntroScene from "./introScene.js";
+import WinScene from "./winScene.js";
 
 
 const config = {
@@ -25,7 +26,7 @@ const config = {
 		// width: 640,
 		// height: 960
 	},
-	scene: [TitleScene, IntroScene, MainGameScene, HudScene]
+	scene: [TitleScene, IntroScene, MainGameScene, HudScene, WinScene]
 	// scene: {
 	// 	preload: preload,
 	// 	create: create,

@@ -31,7 +31,7 @@ export const spaceshipStats = {
 	waterOnFloor: 0,
 	pilotHealth: 100,
 	pilotDeviation: 0,
-	distanceLeft: 280000,
+	distanceLeft: 140000,
 	o2: 20
 };
 
@@ -301,6 +301,12 @@ class MainGameScene extends Phaser.Scene {
 			}
 			if (spaceshipStats.water === 0) {
 				// TODO: start thrist damage
+			}
+			if (spaceshipStats.distanceLeft < 300) {
+				this.scene.start('WinScene');
+				this.scene.stop('GameScene');
+				this.scene.stop('HudScene');
+				motorSound && motorSound.stop();
 			}
 		}
 		updateGoals.call(this);

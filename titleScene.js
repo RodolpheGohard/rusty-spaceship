@@ -24,12 +24,12 @@ export default class TitleScene extends Phaser.Scene {
 	}
 
 	update(time, delta) {
-		if (this.cursors.space.isDown) {
-			// timState = "WORK";
-			// check interactive
-
+		if (this.cursors.shift.isDown && this.cursors.space.isDown) {
+			// Cheeeat !
+			this.scene.start('WinScene');
+			this.scene.stop();
+		} else if (this.cursors.space.isDown) {
 			this.scene.start('IntroScene');
-
 			this.scene.stop();
 
 		}
