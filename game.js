@@ -56,6 +56,7 @@ const game = new Phaser.Game(config);
 function preload() {
 	this.load.image('spaceship', 'assets/spaceship.png');
 	this.load.image('wall', 'assets/wall.png');
+	this.load.image('pilot', 'assets/pilot.png');
 	this.load.multiatlas('tim', 'assets/tim/tim.json', 'assets/tim');
 }
 
@@ -102,6 +103,12 @@ function create() {
 	tim.enableBody();
 	// tim.anims.play('walk');
 	tim.anims.play('stand');
+
+	const pilot = this.physics.add.sprite(1416, HEIGHT/2-139, 'pilot');
+	pilot.setImmovable(true);
+	pilot.disableBody(true);
+	pilot.setScale(0.1); //.refreshBody();
+	// pilot.enableBody();
 
 
 	/* LADDERS */
