@@ -46,7 +46,7 @@ const spaceshipStats = {
 function create() {
 	const scene = this;
 
-	this.add.image(WIDTH/2, HEIGHT/2, 'spaceship');
+	const spaceship = this.add.image(WIDTH/2, HEIGHT/2, 'spaceship');
 
 	const actualFrameNames = Object.keys(this.anims.textureManager.get('tim').frames).slice(1);
 
@@ -129,7 +129,21 @@ function create() {
 	engineTop.interactiveName = "top engine";
 	this.engineTop = engineTop;
 
-
+	const particles = this.add.particles('wall');
+	const particlesEmitter = particles.createEmitter({
+		// frame: 'blue',
+		x: 300,
+		y: HEIGHT/2-325,
+		lifespan: 700,
+		speed: { min: 200, max: 600 },
+		rotate: { onEmit: function () { return Math.random()*360; } },
+		angle: 180,
+		// gravityY: 300,
+		scale: { start: 7, end: 0 },
+		quantity: 1,
+		blendMode: 'ADD'
+	});
+	engineTop.particles = particlesEmitter;
 
 	this.interactives = interactives;
 	interactives.setVisible(false);
@@ -148,7 +162,17 @@ function create() {
 	};
 
 	// HUD
-	this.hud = this.add.text(0, 0, '-', { font: '25px Courier', fill: 'white', backgroundColor: 'black' });
+	const hudCam = this.cameras.add(0,0,350,200);
+	const hud = this.hud = this.add.text(0, 0, '-', { font: '25px Courier', fill: 'white', backgroundColor: 'black' });
+	const camList = this.cameras.cameras;
+	function setCamera(cam) {
+
+		let l = (1 << camList.length) - 1;
+
+		return l & ~cam.id;
+	}
+	this.hud.cameraFilter = setCamera(hudCam);
+	hudCam.ignore([spaceship, tim, interactives, platforms, particles]); // Ignore everything but hud, unfortunately phaser hasn't though this through, it seems ...
 
 
 	// /* Physics with TIM */
@@ -157,6 +181,12 @@ function create() {
 
 	this.cursors = this.input.keyboard.createCursorKeys();
 	this.player = tim;
+
+	// Camera
+	// this.cameras.main.setBounds(0, 0, 800, 400);
+	this.cameras.main.zoom = 1.5;
+	this.cameras.main.startFollow(tim);
+	this.cameras.main.ignore(hud);
 }
 
 let timState = "STAND";
