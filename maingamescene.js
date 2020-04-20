@@ -34,7 +34,20 @@ document.addEventListener('click',  () => {
 });
 
 // TODO: not needed anymore, since in level data
+
+class Score {
+	get total() {
+		return Object.keys(this).reduce( (acc,item) => acc+this[item], 0);
+	}
+
+	markScore(success, score) {
+		if (!this[success]) this[success] = 0;
+		this[success] += score;
+	}
+}
+
 export const spaceshipStats = {
+	score: new Score(),
 	fuel: 3000,
 	fuelOnFloor: 0,
 	water: 2000,
@@ -188,7 +201,7 @@ class MainGameScene extends Phaser.Scene {
 		this.createEngine(415, HEIGHT/2-315, 'engineTop',"top engine");
 		this.createEngine(415, HEIGHT/2-120, 'engineMiddle',"middle engine");
 		this.createEngine(415, HEIGHT/2+75, 'engineBottom',"bottom engine");
-		
+
 		this.createRepairParticles();
 
 		interactives.setVisible(false);
@@ -205,6 +218,9 @@ class MainGameScene extends Phaser.Scene {
 		this.hideTooltip = function hideTooltip() {
 			tooltipText.setVisible(false);
 		};
+		// Success tooltip
+		this.repairSuccessTooltip = this.add.text(0, 0, 'Repair Success', { font: '25px Courier', fill: '#22AA66', backgroundColor: '#BBFFBB' });
+		this.repairSuccessTooltip.setVisible(false);
 
 		this.cursors = this.input.keyboard.createCursorKeys();
 		this.player = tim;
@@ -593,6 +609,10 @@ class MainGameScene extends Phaser.Scene {
 					this.dropsParticlesEmitter.setPosition(tim.x, tim.y-40); // Or position to interactive ?
 
 					activeInteractive.progress += .5;
+
+					if (activeInteractive.progress >= 100) {
+						this.repairSuccess(activeInteractive);
+					}
 				} else {
 					activeInteractive.alert && activeInteractive.alert.setVisible(false);
 				}
@@ -604,6 +624,27 @@ class MainGameScene extends Phaser.Scene {
 
 			tim.anims.play('stand');
 		}
+
+	}
+
+	repairSuccess(activeInteractive) {
+		const bonusScore = 10;
+		spaceshipStats.score.markScore('REPAIR_SUCCESS', 10);
+
+		this.repairSuccessParticlesEmitter.explode(5,activeInteractive.x, activeInteractive.y);
+
+		this.repairSuccessTooltip.setText("Repair Success ! +" + bonusScore);
+		this.repairSuccessTooltip.setPosition(activeInteractive.x, activeInteractive.y-30);
+		this.repairSuccessTooltip.setVisible(true);
+		this.tweens.add({
+			targets: this.repairSuccessTooltip,
+			alpha: 0.3,
+			duration: 3300,
+			ease: 'Power2'
+		}).setCallback('onComplete', () => {
+			this.repairSuccessTooltip.setVisible(false);
+			this.repairSuccessTooltip.setAlpha(1);
+		}, [], this);
 
 	}
 }

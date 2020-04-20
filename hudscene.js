@@ -45,7 +45,8 @@ export default class HudScene extends Phaser.Scene {
 		this.updateGoals();
 
 		this.hud.setText(
-			`FUEL: ${numberFormat.format(spaceshipStats.fuel)}
+`SCORE: ${numberFormat.format(spaceshipStats.score.total)}
+FUEL: ${numberFormat.format(spaceshipStats.fuel)}
 WATER: ${numberFormat.format(spaceshipStats.water)}
 O2: ${oxygenNumberFormat.format(spaceshipStats.o2)}
 PILOT: ${spaceshipStats.pilotHealth}
