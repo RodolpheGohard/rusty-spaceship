@@ -74,7 +74,14 @@ class MainGameScene extends Phaser.Scene {
 		this.load.image('pilot', 'assets/pilot.png');
 		this.load.multiatlas('tim', 'assets/tim/tim.json', 'assets/tim');
 
+		// particles
+		this.load.image('smoke', 'assets/smoke.png');
+		this.load.image('drop', 'assets/drop.png');
+		this.load.image('successStar', 'assets/star.png');
+
+
 		this.load.audio('rusty-spaceship', ['assets/JohnDuff - Rusty Spaceship (original).mp3'/*, 'assets/audio/bodenstaendig_2000_in_rock_4bit.ogg'*/]);
+
 	}
 
 	create() {
@@ -120,6 +127,7 @@ class MainGameScene extends Phaser.Scene {
 		tim.enableBody();
 		// tim.anims.play('walk');
 		tim.anims.play('stand');
+
 
 		/* Pilot */
 		const pilot = this.physics.add.sprite(1416, HEIGHT/2-139, 'pilot');
@@ -180,6 +188,8 @@ class MainGameScene extends Phaser.Scene {
 		this.createEngine(415, HEIGHT/2-315, 'engineTop',"top engine");
 		this.createEngine(415, HEIGHT/2-120, 'engineMiddle',"middle engine");
 		this.createEngine(415, HEIGHT/2+75, 'engineBottom',"bottom engine");
+		
+		this.createRepairParticles();
 
 		interactives.setVisible(false);
 
@@ -226,6 +236,68 @@ class MainGameScene extends Phaser.Scene {
 		});
 		engineTop.particlesEmitter = particlesEmitter;
 		engineTop.particles = particles;
+	}
+
+	createRepairParticles() {
+		const smokeParticles = this.add.particles('smoke');
+		const smokeParticlesEmitter = smokeParticles.createEmitter({
+			// frame: 'blue',
+			x: 500,
+			y: 500,
+			lifespan: 1000,
+			speed: { min: 30, max: 70 },
+			gravityY: -30,
+			rotate: { onEmit: function () { return Math.random()*360; } },
+			angle: { onEmit: function () { return Math.random()*360; } }, // TODO: should be random between 0 and -180
+			// gravityY: 300,
+			scale: { start: .25, end: .12 },
+			alpha: {start: 1, end: 0},
+			quantity: 1,
+			frequency: 300,
+			blendMode: 'NORMAL'
+		});
+
+		const dropsParticles = this.add.particles('drop');
+		const dropsParticlesEmitter = dropsParticles.createEmitter({
+			// frame: 'blue',
+			x: 500,
+			y: 500,
+			lifespan: 1200,
+			speed: { min: 20, max: 50 },
+			rotate: { onEmit: function () { return Math.random()*360; } },
+			angle: { onEmit: function () { return Math.random()*360; } }, // TODO: should be random between 0 and -180
+			gravityY: 200, // TODO: apply gravity on sparkles win scene
+			scale: .05,
+			quantity: 4,
+			frequency: 1200,
+			blendMode: 'NORMAL'
+		});
+
+		const repairSuccessParticles = this.add.particles('successStar'); // TODO: Should be slow, slow done, and fade out
+		const repairSuccessParticlesEmitter = repairSuccessParticles.createEmitter({
+			// frame: 'blue',
+			x: 1500,
+			y: 500,
+			lifespan: 1700,
+			// speed: { min: 50, max: 70 },
+			speed: { start: 50, end: 0 },
+			rotate: { onEmit: function () { return Math.random()*360; } },
+			angle: { onEmit: function () { return Math.random()*360; } }, // TODO: should be random between 0 and -180
+			// gravityY: 300, // TODO: apply gravity on sparkles win scene
+			scale: { start: .2, end: .1 },
+			alpha: {start: 1, end: 0},
+			quantity: 5,
+			frequency: 1000,
+			blendMode: 'NORMAL'
+		});
+
+		this.smokeParticlesEmitter = smokeParticlesEmitter;
+		this.dropsParticlesEmitter = dropsParticlesEmitter;
+		this.repairSuccessParticlesEmitter = repairSuccessParticlesEmitter;
+
+		smokeParticlesEmitter.stop();
+		dropsParticlesEmitter.stop();
+		repairSuccessParticlesEmitter.stop();
 	}
 
 	update(time, deltaMs) {
@@ -457,46 +529,82 @@ class MainGameScene extends Phaser.Scene {
 		}
 	}
 
+	/* state -> action -> new state */
+	fsm = {
+		"STAND": {
+			"WALK_LEFT": "WALK",
+			"WALK_RIGHT": "WALK",
+			"CLIMB_DOWN": "CLIMB",
+			"CLIMB_UP": "CLIMB",
+			"WORK": "WORK",
+			"STAND": "STAND"
+		}
+	}; // We ll see later
+	stateAction(action) {
+		const resultingState = this.fsm["STAND"][action];
+
+		if (resultingState !== timState) {
+			console.log("previous state:", timState, "newState:", resultingState, "action", action);
+			// trigger exit state actions
+			switch (timState) {
+				case 'WORK':
+					this.dropsParticlesEmitter.stop();
+					this.smokeParticlesEmitter.stop();
+					break;
+			}
+			// trigger enterstate actions
+			switch (resultingState) {
+				case 'WORK':
+					this.smokeParticlesEmitter.start();
+					this.dropsParticlesEmitter.start();
+			}
+			timState = resultingState;
+		}
+	}
+
 	processPlayerAction(canClimb, activeInteractive) {
 		const tim = this.player;
 
 		if (this.cursors.left.isDown) {
-			timState = "WALK";
+			this.stateAction("WALK_LEFT");
 			tim.setVelocityX(-WALK_VELOCITY);
 			tim.anims.play('walk', true);
 			tim.setFlipX(true);
 		} else if (this.cursors.right.isDown) {
-			timState = "WALK";
+			this.stateAction("WALK_RIGHT");
 			tim.setVelocityX(WALK_VELOCITY);
 			tim.anims.play('walk', true);
 			tim.setFlipX(false);
 		} else if (this.cursors.down.isDown && canClimb) {
-			timState = "CLIMB";
+			this.stateAction("CLIMB_DOWN");
 			tim.setVelocityY(CLIMB_VELOCITY);
 			tim.anims.play('climb', true);
 		} else if (this.cursors.up.isDown && canClimb) {
-			timState = "CLIMB";
+			this.stateAction("CLIMB_UP");
 			tim.setVelocityY(-CLIMB_VELOCITY);
 			tim.anims.play('climb', true);
+		} else if (this.cursors.space.isDown) {
+			// check interactive
+			if (activeInteractive) {
+				if (activeInteractive.progress < 100) {
+					this.stateAction("WORK");
+					// REPAIRING STUFF
+					this.smokeParticlesEmitter.setPosition(activeInteractive.x, activeInteractive.y+30); // Or position to interactive ?
+					this.dropsParticlesEmitter.setPosition(tim.x, tim.y-40); // Or position to interactive ?
+
+					activeInteractive.progress += .5;
+				} else {
+					activeInteractive.alert && activeInteractive.alert.setVisible(false);
+				}
+			}
 		} else {
-			timState = "STAND";
+			this.stateAction("STAND");
 			tim.setVelocityX(0);
 			tim.setVelocityY(0);
 
 			tim.anims.play('stand');
 		}
 
-		if (this.cursors.space.isDown) {
-			timState = "WORK";
-			// check interactive
-			if (activeInteractive) {
-				if (activeInteractive.progress < 100) {
-					activeInteractive.progress += .5;
-				} else {
-					activeInteractive.alert && activeInteractive.alert.setVisible(false);
-				}
-			}
-		}
 	}
 }
 
