@@ -1,23 +1,18 @@
+import {LEVEL_DATA} from "./leveldata.js";
+import {LevelManager} from "./levelmanager.js";
+
 export default class IntroScene extends Phaser.Scene {
 
-	storylines = [
-		"Hey, I've got a job for you -",
-		"The company needs the spaceship to \ngo to Planet CAPRICUS ALPHA II.",
-		"We need someone to take care of\n the maintenance there",
-		"Now I'm not gonna lie, \nthis spaceship have had better days",
-		"But times are hard you now,\nbudgets are tight.",
-		"we can't really afford to buy a shiny new aeronef",
-		"So lets go OK ?",
-		"Oh, and by the way,\n   the pay is not so good",
-		"And we might need you to do unpaid overtime",
-		"But you need a job right ?",
-		"Don't worry, it should be a lot of fun.",
-		"Fine, next"
-	];
+	storylines = null;
 	currentStoryLine = 0;
 
-	constructor() {
-		super({key: 'IntroScene'});
+	init(levelData) {
+		this.levelData = levelData;
+		this.storylines = levelData.storylines;
+	}
+
+	constructor(key = 'IntroScene') {
+		super({key: key});
 	}
 
 	create() {
@@ -35,24 +30,14 @@ export default class IntroScene extends Phaser.Scene {
 		}
 
 		if (Phaser.Input.Keyboard.JustDown(this.escape) || this.currentStoryLine >= this.storylines.length) {
-			this.scene.start('GameScene');
-			this.scene.start('HudScene');
+			// this.scene.start('GameScene', this.levelData);
+			// this.scene.start('HudScene');
 
-			this.scene.stop();
+			// this.scene.stop();
+			LevelManager.instance.playLevel();
 		} else {
 			this.subtitle.setText(this.storylines[this.currentStoryLine])
 		}
-
-		// if (this.cursors.space.isDown) {
-		// 	// timState = "WORK";
-		// 	// check interactive
-		//
-		// 	this.scene.start('GameScene');
-		// 	this.scene.start('HudScene');
-		//
-		// 	this.scene.stop();
-		//
-		// }
 	}
 
 }

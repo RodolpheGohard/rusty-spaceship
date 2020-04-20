@@ -1,11 +1,10 @@
 import * as motorSoundPackage from "./lib/motor-sound.js"
 
-import MainGameScene from "./maingamescene.js";
 import {HEIGHT, WIDTH} from "./constants.js";
 import HudScene from "./hudscene.js";
 import TitleScene from "./titleScene.js";
-import IntroScene from "./introScene.js";
 import WinScene from "./winScene.js";
+import {LevelManager} from "./levelmanager.js";
 
 
 const config = {
@@ -26,7 +25,7 @@ const config = {
 		// width: 640,
 		// height: 960
 	},
-	scene: [TitleScene, IntroScene, MainGameScene, HudScene, WinScene]
+	scene: [TitleScene, /*IntroScene, MainGameScene,*/ HudScene, WinScene] // Others scene dynamically loaded by LevelManager
 	// scene: {
 	// 	preload: preload,
 	// 	create: create,
@@ -35,3 +34,5 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
+
+LevelManager.instance = new LevelManager(game);

@@ -1,4 +1,5 @@
 import {HEIGHT, WIDTH} from "./constants.js";
+import {LevelManager} from "./levelmanager.js";
 
 export default class WinScene extends Phaser.Scene {
 
@@ -46,6 +47,16 @@ export default class WinScene extends Phaser.Scene {
 				backgroundColor: 'black'
 			}).setOrigin(0.5);
 		}, loop: false});
+
+		this.time.addEvent({
+			delay: 11000,
+			callback: () => {
+				this.scene.stop();
+				LevelManager.instance.nextLevel();
+				// this.scene.start('GameScene', LEVEL_DATA[1]);
+				// this.scene.start('HudScene');
+			}, loop: false}
+		);
 
 
 

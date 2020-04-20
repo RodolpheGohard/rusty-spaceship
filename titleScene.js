@@ -1,3 +1,6 @@
+import {LEVEL_DATA} from "./leveldata.js";
+import {LevelManager} from "./levelmanager.js";
+
 export default class TitleScene extends Phaser.Scene {
 
 	constructor() {
@@ -20,6 +23,7 @@ export default class TitleScene extends Phaser.Scene {
 		this.title = this.add.text(1000, 400, 'Rusty Spaceship', {font: '125px Courier', fill: 'white', backgroundColor: 'black'}).setOrigin(0.5);
 		this.subtitle = this.add.text(1000, 500, 'Press Space to start', {font: '85px Courier', fill: 'white', backgroundColor: 'black'}).setOrigin(0.5);
 
+		this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 		this.cursors = this.input.keyboard.createCursorKeys();
 	}
 
@@ -28,10 +32,10 @@ export default class TitleScene extends Phaser.Scene {
 			// Cheeeat !
 			this.scene.start('WinScene');
 			this.scene.stop();
-		} else if (this.cursors.space.isDown) {
-			this.scene.start('IntroScene');
+		} else if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
+			// this.scene.start('IntroScene', LEVEL_DATA[0]);
 			this.scene.stop();
-
+			LevelManager.instance.playIntro();
 		}
 	}
 

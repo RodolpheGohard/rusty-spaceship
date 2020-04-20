@@ -1,4 +1,5 @@
 import {HEIGHT, WIDTH} from "./constants.js";
+import {LevelManager} from "./levelmanager.js";
 
 
 const FUEL_CONSUMPTION = 1;
@@ -7,15 +8,16 @@ const WATER_WASTE_RATE = 3;
 const CATASTROPHE_CHAIN_DELAY = 3000;
 const WALK_VELOCITY = 270;
 const CLIMB_VELOCITY = 170;
+const CHEAT_DISTANCE_MULTIPLIER = 18;
 
 let motorSound;
 document.addEventListener('click',  () => {
 	if (motorSound) {
 		return;
 	}
-	var AudioContext = window.AudioContext || window.webkitAudioContext;
-	var context = new AudioContext();
-	var generators = [
+	const AudioContext = window.AudioContext || window.webkitAudioContext;
+	const context = new AudioContext();
+	const generators = [
 		new MotorSound.NoiseGenerator(),
 		new MotorSound.LinearGenerator()
 	];
@@ -42,11 +44,27 @@ export const spaceshipStats = {
 	o2: 20
 };
 
+/* probabilities for each interactive to fail, in one second */
+export const failureProbabilities = {
+	fuelTank: 1/120,
+	chair: 1/40,
+	o2Recycler: 1/200,
+	powerGenerator: 1/100,
+	engineTop: 1/60,
+	spaceTimeFolder: 1/400
+};
+
 let timState = "STAND";
 
 class MainGameScene extends Phaser.Scene {
-	constructor () {
-		super('GameScene');
+	constructor(key = 'GameScene') {
+
+		super(key);
+	}
+
+	init(levelData) {
+		Object.assign(spaceshipStats, levelData.spaceshipStats);
+		Object.assign(failureProbabilities, levelData.failureProbabilities);
 	}
 
 	preload() {
@@ -211,6 +229,10 @@ class MainGameScene extends Phaser.Scene {
 	}
 
 	update(time, deltaMs) {
+		if (this.finished) {
+			console.log('scene is finished. Why is phaser even trying to update ?');
+			return;
+		}
 		const tim = this.player;
 		const interactives = this.interactives;
 
@@ -235,8 +257,6 @@ class MainGameScene extends Phaser.Scene {
 		this.updateSpaceshipStats(delta, thrust);
 
 		this.updateGravity();
-
-		this.updateGoals();
 
 		this.updateCamera();
 
@@ -265,6 +285,8 @@ class MainGameScene extends Phaser.Scene {
 		// }
 
 		// tim.body.debugShowBody = true;
+		this.updateGoals();
+
 
 	}
 
@@ -293,10 +315,11 @@ class MainGameScene extends Phaser.Scene {
 		let waterWaste = delta * (1 - +this.waterSupply.progress/100) * WATER_WASTE_RATE;
 		spaceshipStats.water -= waterWaste;
 
-		spaceshipStats.distanceLeft -= 1119*thrust*delta*Math.cos(spaceshipStats.pilotDeviation);
+		spaceshipStats.distanceLeft -= 1119*thrust*delta*Math.cos(spaceshipStats.pilotDeviation)*CHEAT_DISTANCE_MULTIPLIER;
 
 		let o2increaseRate = (this.o2Recycler.progress*.3/35 - (65*0.3/35));
 		spaceshipStats.o2 = Math.min(Math.max( spaceshipStats.o2 + o2increaseRate * delta, 0), 20);
+		// IDEA: too much oxygen, it explodes
 
 
 		if (this.pilot.hasFainted || this.pilot.isDead) {
@@ -332,10 +355,13 @@ class MainGameScene extends Phaser.Scene {
 			// TODO: start thrist damage
 		}
 		if (spaceshipStats.distanceLeft < 300) {
-			this.scene.start('WinScene');
-			this.scene.stop('GameScene');
-			this.scene.stop('HudScene');
-			motorSound && motorSound.stop();
+			motorSound && motorSound.stop(); // TODO: schedule something aftewerards is probably still running
+			// this.scene.start('WinScene');
+			// this.scene.stop('GameScene');
+			// this.scene.stop('HudScene');
+			this.finished = true;
+			LevelManager.instance.winLevel();
+
 		}
 	}
 
@@ -381,21 +407,12 @@ class MainGameScene extends Phaser.Scene {
 	runCatastrophePlanner(delta) {
 		let lastEvent;
 
-		/* probabilities for each interactive to fail, in one second */
-		const probabilities = {
-			fuelTank: 1/120,
-			chair: 1/40,
-			o2Recycler: 1/200,
-			powerGenerator: 1/100,
-			engineTop: 1/60,
-			spaceTimeFolder: 1/400
-		};
 		const now = new Date;
 
 		if (!lastEvent || (now.getTime() - lastEvent.getTime()) > CATASTROPHE_CHAIN_DELAY ) {
-			for (let eventable of Object.keys(probabilities)) {
+			for (let eventable of Object.keys(failureProbabilities)) {
 				// run a simulation
-				const probability = probabilities[eventable] * delta;
+				const probability = failureProbabilities[eventable] * delta;
 				let KARMA = 3;
 				const itsHappening = Math.random() > 1 - probability*KARMA;
 
