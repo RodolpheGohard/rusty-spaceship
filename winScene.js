@@ -24,7 +24,8 @@ export default class WinScene extends Phaser.Scene {
 	}
 
 	preload() {
-		this.load.image('spaceship', 'assets/spaceship.png');
+		console.log('preloading winScene');
+		this.load.image('spaceshipExterior', 'assets/spaceship-exterior.png');
 		this.load.image('engine', 'assets/engine.png');
 		this.load.image('wall', 'assets/wall.png');
 		this.load.image('road', 'assets/road.png');
@@ -65,7 +66,7 @@ export default class WinScene extends Phaser.Scene {
 		platforms.setVisible(false);
 		this.road = this.add.tileSprite(0, 1100, 50000, 1000, 'road');
 
-		this.spaceship = this.physics.add.sprite(-200, 0, 'spaceship').setScale(.3); //.refreshBody();
+		this.spaceship = this.physics.add.sprite(-200, 0, 'spaceshipExterior').setScale(.3); //.refreshBody();
 		this.spaceship.setBounce(.5);
 		// this.spaceship.setFriction(500); // doesn't work when skating ?
 		this.spaceship.setVelocityX(4500);
