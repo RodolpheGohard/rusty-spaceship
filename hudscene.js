@@ -26,12 +26,17 @@ export default class HudScene extends Phaser.Scene {
 
 		this.hud = this.add.text(0, 0, '-', {font: '25px Courier', fill: 'white', backgroundColor: 'black'});
 
-		this.lowO2Warning = this.add.text(250, 50, '⚠ Low Oxygen', {
+		this.lowO2Warning = this.add.text(250, 75, '⚠ Low Oxygen', {
 			font: '25px Courier',
 			fill: 'yellow',
 			backgroundColor: 'black'
 		});
-		this.lowFuelWarning = this.add.text(250, 0, '⚠ Low Fuel', {
+		this.lowFuelWarning = this.add.text(250, 25, '⚠ Low Fuel, watch for broken engines and leaking tanks', { // TODO: warn when leak ?
+			font: '25px Courier',
+			fill: 'yellow',
+			backgroundColor: 'black'
+		});
+		this.engineWarning = this.add.text(250, 100, '⚠ Failing Engine, slowed course, fuel spilled, risk of worsening', {
 			font: '25px Courier',
 			fill: 'yellow',
 			backgroundColor: 'black'
@@ -39,6 +44,7 @@ export default class HudScene extends Phaser.Scene {
 
 		this.lowO2Warning.setVisible(false);
 		this.lowFuelWarning.setVisible(false);
+		this.engineWarning.setVisible(false);
 	}
 
 	update(time, delta) {
@@ -78,6 +84,15 @@ DISTANCE: ${numberFormat.format(spaceshipStats.distanceLeft)}`
 		}
 		if (spaceshipStats.fuelOnFloor > 100) {
 			// TODO: raise fuel spill warning
+		}
+		if (spaceshipStats.interactivesStatus && (
+			spaceshipStats.interactivesStatus.topEngine < 100 ||
+			spaceshipStats.interactivesStatus.middleEngine < 100 ||
+			spaceshipStats.interactivesStatus.bottomEngine < 100
+		)) {
+			this.engineWarning.setVisible(true);
+		} else {
+			this.engineWarning.setVisible(false);
 		}
 	}
 }

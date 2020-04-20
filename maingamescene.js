@@ -63,7 +63,7 @@ export const failureProbabilities = {
 	chair: 1/40,
 	o2Recycler: 1/200,
 	powerGenerator: 1/100,
-	engineTop: 1/60,
+	topEngine: 1/60,
 	spaceTimeFolder: 1/400
 };
 
@@ -112,7 +112,6 @@ class MainGameScene extends Phaser.Scene {
 
 		const spaceship = this.add.image(WIDTH/2, HEIGHT/2, 'spaceship');
 
-		const actualFrameNames = Object.keys(this.anims.textureManager.get('tim').frames).slice(1);
 
 		/* Creatings walls and platforms on the plane */
 		const platforms = this.physics.add.staticGroup();
@@ -128,13 +127,50 @@ class MainGameScene extends Phaser.Scene {
 		platforms.setVisible(false);
 		this.platforms = platforms;
 
+
+		const actualFrameNames = Object.keys(this.anims.textureManager.get('tim').frames).slice(1);
+
+		// Try to cheat moving body bug
+		// Object.values(this.anims.textureManager.get('tim').frames).forEach(frame => {
+		// 	frame.centerX = 65;
+		// 	frame.centerY = 116;
+		// 	frame.pivotX = 65;
+		// 	frame.pivotY = 116;
+		// });
+
+		function framesForAnimCreate(framenames) {
+			return framenames.map(frameName => ({ key: 'tim', frame: frameName }))
+		}
+
 		/* Anims for Tim */
-		this.anims.create({ key: 'walk', frames: actualFrameNames.map(frameName => ({ key: 'tim', frame: frameName })).reverse(), frameRate: 9, repeat: -1 });
-		this.anims.create({ key: 'stand', frames: [{ key: 'tim', frame: actualFrameNames[8] }], frameRate: 7, repeat: -1 });
-		this.anims.create({ key: 'climb', frames: [{ key: 'tim', frame: actualFrameNames[3] }, { key: 'tim', frame: actualFrameNames[6] }], frameRate: 4, repeat: -1 });
+		this.anims.create({
+			key: 'walk',
+			frames: actualFrameNames.map(frameName => ({key: 'tim', frame: frameName})).slice(6).reverse(),
+			frameRate: 9,
+			repeat: -1
+		});
+		this.anims.create({
+			key: 'stand',
+			frames: [{key: 'tim', frame: actualFrameNames[14]}],
+			frameRate: 7,
+			repeat: -1
+		});
+		this.anims.create({
+			key: 'climb', frames: framesForAnimCreate(actualFrameNames.slice(2, 6)),
+			frameRate: 4,
+			repeat: -1
+		});
+		this.anims.create({
+			key: 'work',
+			frames: framesForAnimCreate(actualFrameNames.slice(0, 2)),
+			frameRate: 4,
+			repeat: -1
+		});
 
 		/* TIM */
 		const tim = this.physics.add.sprite(WIDTH/2-500, HEIGHT/2-125, 'tim');
+
+		tim.body.setSize(131,232);
 		tim.setX(WIDTH/2+100); //cheat
 		tim.setScale(0.55); //.refreshBody();
 		tim.enableBody();
@@ -158,49 +194,20 @@ class MainGameScene extends Phaser.Scene {
 
 
 		/* Initializing interactives - objects in the space you can interact with */
-		const interactives = this.physics.add.staticGroup();
-		this.interactives = interactives;
+		const interactives = this.interactives = this.physics.add.staticGroup();
 
-		const chair = interactives.create(1400, HEIGHT/2-125, 'wall').setScale(8,18).refreshBody();
-		chair.progress = 100;
-		chair.interactiveName = "chair";
-		this.chair = chair;
-
-		const fuelTank = interactives.create(740, HEIGHT/2+65, 'wall').setScale(5,8).refreshBody();
-		fuelTank.progress = 100;
-		fuelTank.interactiveName = "fuel tank";
-		this.fuelTank = fuelTank;
-
-		const powerGenerator = interactives.create(940, HEIGHT/2+65, 'wall').setScale(5,8).refreshBody();
-		powerGenerator.progress = 100;
-		powerGenerator.interactiveName = "power generator";
-		this.powerGenerator = powerGenerator;
-
-		const waterSupply = interactives.create(1140, HEIGHT/2+65, 'wall').setScale(5,8).refreshBody();
-		waterSupply.progress = 100;
-		waterSupply.interactiveName = "water supply";
-		this.waterSupply = waterSupply;
-
+		this.chair = this.createInteractive('chair', 1400, HEIGHT / 2 - 125, 'chair');
+		this.fuelTank = this.createInteractive('fuelTank', 740, HEIGHT/2+65, 'fuel tank');
+		this.powerGenerator = this.createInteractive('powerGenerator', 940, HEIGHT / 2 + 65, 'power generator');
+		this.waterSupply = this.createInteractive('waterSupply', 1140, HEIGHT / 2 + 65, 'water supplier');
 		// TODO: break it to timewarp to next levels
-		const spaceTimeFolder = interactives.create(1355, HEIGHT/2+65, 'wall').setScale(5,8).refreshBody();
-		spaceTimeFolder.progress = 100;
-		spaceTimeFolder.interactiveName = "space time folder";
-		this.spaceTimeFolder = spaceTimeFolder;
+		this.spaceTimeFolder = this.createInteractive('spaceTimeFolder', 1355, HEIGHT / 2 + 65, 'space time folder');
+		this.o2Recycler = this.createInteractive('o2Recycler', 1010, HEIGHT / 2-265, 'o2 supplier');
+		this.airConditioner = this.createInteractive('airConditioner', 810, HEIGHT / 2 -265, 'water supplier');
 
-		const o2Recycler = interactives.create(1010, HEIGHT/2-265, 'wall').setScale(5,8).refreshBody();
-		o2Recycler.progress = 100;
-		o2Recycler.interactiveName = "O2 recycler";
-		this.o2Recycler = o2Recycler;
-
-		const airConditioner = interactives.create(810, HEIGHT/2-265, 'wall').setScale(5,8).refreshBody();
-		airConditioner.progress = 100;
-		airConditioner.interactiveName = "air conditioner";
-		this.airConditioner = airConditioner;
-
-
-		this.createEngine(415, HEIGHT/2-315, 'engineTop',"top engine");
-		this.createEngine(415, HEIGHT/2-120, 'engineMiddle',"middle engine");
-		this.createEngine(415, HEIGHT/2+75, 'engineBottom',"bottom engine");
+		this.createEngine(415, HEIGHT/2-315, 'topEngine',"top engine");
+		this.createEngine(415, HEIGHT/2-120, 'middleEngine',"middle engine");
+		this.createEngine(415, HEIGHT/2+75, 'bottomEngine',"bottom engine");
 
 		this.createRepairParticles();
 
@@ -211,7 +218,7 @@ class MainGameScene extends Phaser.Scene {
 		tooltipText.setVisible(false);
 		this.activateTooltip = function activateTooltip(interactive) {
 			tooltipText.setVisible(true);
-			tooltipText.setText(`Broken ${interactive.interactiveName}\n Repair (${interactive.progress<100 ? Math.floor(interactive.progress)+'%' : 'complete'})`);
+			tooltipText.setText(`Broken ${interactive.interactiveText}\n Repair (${interactive.progress<100 ? Math.floor(interactive.progress)+'%' : 'complete'})`);
 			tooltipText.setX(interactive.x);
 			tooltipText.setY(interactive.y - 120)
 		};
@@ -229,29 +236,41 @@ class MainGameScene extends Phaser.Scene {
 		this.cameras.main.startFollow(tim);
 	}
 
+	createInteractive(name, x, y, text) {
+		const interactive = this.interactives.create(x, y, 'wall').setScale(5, 8).refreshBody();
+		interactive.progress = 100;
+		interactive.interactiveName = name;
+		interactive.interactiveText = text;
+		return interactive;
+	}
+
 	createEngine(x, y, name, text) {
-		const engineTop = this.interactives.create(x+50, y, 'wall').setScale(5,8).refreshBody();
+		const engine = this.interactives.create(x+50, y, 'wall').setScale(5,8).refreshBody();
 		const engineSprite = this.add.sprite(x, y, 'engine');
-		engineTop.progress = 100;
-		engineTop.interactiveName = text;
-		this[name] = engineTop;
+		engine.progress = 100;
+		engine.interactiveName = name;
+		engine.interactiveText = text;
+		this[name] = engine;
 
 		const particles = this.add.particles('wall');
-		const particlesEmitter = particles.createEmitter({
+		engine.particlesEmitter = particles.createEmitter({
 			// frame: 'blue',
 			x: x - 95,
 			y: y, //- 60,
 			lifespan: 700,
-			speed: { min: 200, max: 600 },
-			rotate: { onEmit: function () { return Math.random()*360; } },
+			speed: {min: 200, max: 600},
+			rotate: {
+				onEmit: function () {
+					return Math.random() * 360;
+				}
+			},
 			angle: 180,
 			// gravityY: 300,
-			scale: { start: 7, end: 0 },
+			scale: {start: 7, end: 0},
 			quantity: 1,
 			blendMode: 'ADD'
 		});
-		engineTop.particlesEmitter = particlesEmitter;
-		engineTop.particles = particles;
+		engine.particles = particles;
 	}
 
 	createRepairParticles() {
@@ -340,7 +359,7 @@ class MainGameScene extends Phaser.Scene {
 		});
 
 
-		const thrust = spaceshipStats.fuel>0 ? (this.engineTop.progress / 100) : 0;
+		const thrust = spaceshipStats.fuel>0 ? (this.topEngine.progress / 100) : 0;
 
 		this.updateSpaceshipStats(delta, thrust);
 
@@ -372,6 +391,7 @@ class MainGameScene extends Phaser.Scene {
 		// 	tim.setVelocityY(-330);
 		// }
 
+		this.reportInteractiveStatus();
 		// tim.body.debugShowBody = true;
 		this.updateGoals();
 
@@ -417,6 +437,7 @@ class MainGameScene extends Phaser.Scene {
 			spaceshipStats.pilotDeviation += -Math.sign(Math.sin(spaceshipStats.pilotDeviation))*.1*delta;
 		}
 	}
+
 
 	updateGoals() {
 		if (spaceshipStats.o2 < 10) {
@@ -478,7 +499,7 @@ class MainGameScene extends Phaser.Scene {
 			return;
 		}
 		motorSound.setSpeed(.52*thrust);
-		let distance = Math.max(1, Phaser.Math.Distance.Between(this.player.x, this.player.y, this.engineTop.x, this.engineTop.y)/50);
+		let distance = Math.max(1, Phaser.Math.Distance.Between(this.player.x, this.player.y, this.topEngine.x, this.topEngine.y)/50);
 		if (distance > 10 || thrust == 0) {
 			motorSound.stop();
 		} else {
@@ -490,16 +511,16 @@ class MainGameScene extends Phaser.Scene {
 	}
 
 	updateEngineParticles(thrust) {
-		const particleEmitter = this.engineTop.particlesEmitter;
+		const particleEmitter = this.topEngine.particlesEmitter;
 		if (thrust === 0) {
-			// scene.engineTop.particlesEmitter.setQuantity(0);
+			// scene.topEngine.particlesEmitter.setQuantity(0);
 			particleEmitter.stop();
 		}
-		// scene.engineTop.particlesEmitter.setSpeed(400 * scene.engineTop.progress/100);
-		particleEmitter.setSpeed({ min: 200* thrust, max: 600* this.engineTop.progress/100 });
+		// scene.topEngine.particlesEmitter.setSpeed(400 * scene.topEngine.progress/100);
+		particleEmitter.setSpeed({ min: 200* thrust, max: 600* this.topEngine.progress/100 });
 		particleEmitter.setScale({ start: 2+5* thrust, end: 0 });
-		// scene.engineTop.particlesEmitter.setTint(0xff6666)
-		// scene.engineTop.particlesEmitter.setLifespan(1000 * scene.engineTop.progress/100);
+		// scene.topEngine.particlesEmitter.setTint(0xff6666)
+		// scene.topEngine.particlesEmitter.setLifespan(1000 * scene.topEngine.progress/100);
 	}
 
 	runCatastrophePlanner(delta) {
@@ -604,6 +625,7 @@ class MainGameScene extends Phaser.Scene {
 			if (activeInteractive) {
 				if (activeInteractive.progress < 100) {
 					this.stateAction("WORK");
+					tim.anims.play('work', true);
 					// REPAIRING STUFF
 					this.smokeParticlesEmitter.setPosition(activeInteractive.x, activeInteractive.y+30); // Or position to interactive ?
 					this.dropsParticlesEmitter.setPosition(tim.x, tim.y-40); // Or position to interactive ?
@@ -636,16 +658,34 @@ class MainGameScene extends Phaser.Scene {
 		this.repairSuccessTooltip.setText("Repair Success ! +" + bonusScore);
 		this.repairSuccessTooltip.setPosition(activeInteractive.x, activeInteractive.y-30);
 		this.repairSuccessTooltip.setVisible(true);
-		this.tweens.add({
-			targets: this.repairSuccessTooltip,
-			alpha: 0.3,
-			duration: 3300,
-			ease: 'Power2'
-		}).setCallback('onComplete', () => {
-			this.repairSuccessTooltip.setVisible(false);
-			this.repairSuccessTooltip.setAlpha(1);
-		}, [], this);
 
+		this.time.addEvent({
+			delay: 2000,
+			callback: () => {
+				this.tweens.add({
+					targets: this.repairSuccessTooltip,
+					alpha: 0,
+					duration: 1000,
+					ease: 'Linear'
+				}).setCallback('onComplete', () => {
+					this.repairSuccessTooltip.setVisible(false);
+					this.repairSuccessTooltip.setAlpha(1);
+				}, [], this);
+			}, loop: false}
+		);
+
+
+
+	}
+
+	reportInteractiveStatus() {
+		spaceshipStats.interactivesStatus = this.interactives
+			.getChildren()
+			.map(interactive => [interactive.interactiveName, interactive.progress] )
+			.reduce((acc, [name, progress])=> {
+				acc[name] = progress;
+				return acc;
+			}, {});
 	}
 }
 

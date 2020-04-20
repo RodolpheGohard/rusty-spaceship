@@ -55,8 +55,8 @@ export const LEVEL_DATA = [
 			chair: 1 / 40,
 			o2Recycler: 0,
 			powerGenerator: 0,
-			engineTop: 1 / 60,
-			engineMiddle: 1 / 60,
+			topEngine: 1 / 60,
+			middleEngine: 1 / 60,
 			spaceTimeFolder: 0
 		},
 		storylines: [
@@ -87,9 +87,9 @@ export const LEVEL_DATA = [
 			chair: 1 / 10,
 			o2Recycler: 1/15,
 			powerGenerator: 0,
-			engineTop: 1 / 20,
-			engineMiddle: 1 / 20,
-			engineBottom: 1 / 20,
+			topEngine: 1 / 20,
+			middleEngine: 1 / 20,
+			bottomEngine: 1 / 20,
 			spaceTimeFolder: 1/600
 		},
 		storylines: [
@@ -120,9 +120,9 @@ export const LEVEL_DATA = [
 			chair: 1 / 40,
 			o2Recycler: 1/45,
 			powerGenerator: 1/40,
-			engineTop: 1 / 60,
-			engineMiddle: 1 / 50,
-			engineBottom: 1 / 40,
+			topEngine: 1 / 60,
+			middleEngine: 1 / 50,
+			bottomEngine: 1 / 40,
 			spaceTimeFolder: 1/300
 		},
 		storylines: [
