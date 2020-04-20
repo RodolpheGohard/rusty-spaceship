@@ -29,6 +29,11 @@ export class LevelManager {
 		this.scene.getScene('HudScene').scene.bringToTop();
 		this.scene.stop('IntroScene'+this.currentLevel);
 		this.scene.remove('IntroScene'+this.currentLevel);
+
+		if (this.currentLevel === 0) {
+			this.scene.start('TutorialScene');
+			this.scene.getScene('TutorialScene').scene.bringToTop();
+		}
 	}
 
 	winLevel() {
@@ -36,6 +41,7 @@ export class LevelManager {
 		this.scene.stop('MainGameScene'+this.currentLevel);
 		this.scene.remove('MainGameScene'+this.currentLevel);
 		this.scene.stop('HudScene');
+		this.scene.stop('TutorialScene');
 	}
 
 	nextLevel() {
@@ -49,6 +55,7 @@ export class LevelManager {
 		this.scene.stop('MainGameScene'+this.currentLevel);
 		this.scene.remove('MainGameScene'+this.currentLevel);
 		this.scene.stop('HudScene');
+		this.scene.stop('TutorialScene');
 	}
 }
 

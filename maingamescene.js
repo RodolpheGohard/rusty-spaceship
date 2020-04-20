@@ -8,7 +8,7 @@ const WATER_WASTE_RATE = 3;
 const CATASTROPHE_CHAIN_DELAY = 3000;
 const WALK_VELOCITY = 270;
 const CLIMB_VELOCITY = 170;
-const CHEAT_DISTANCE_MULTIPLIER = 18;
+const CHEAT_DISTANCE_MULTIPLIER = 1;
 
 let motorSound;
 document.addEventListener('click',  () => {
@@ -33,6 +33,7 @@ document.addEventListener('click',  () => {
 	motorSound.setVolume(.2);
 });
 
+// TODO: not needed anymore, since in level data
 export const spaceshipStats = {
 	fuel: 3000,
 	fuelOnFloor: 0,
