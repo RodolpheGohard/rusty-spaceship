@@ -43,7 +43,6 @@ export const spaceshipStats = {
 	distanceLeft: 140000,
 	o2: 20
 };
-
 /* probabilities for each interactive to fail, in one second */
 export const failureProbabilities = {
 	fuelTank: 1/120,
@@ -338,18 +337,28 @@ class MainGameScene extends Phaser.Scene {
 		if (spaceshipStats.o2 > 15) {
 			this.pilot.hasFainted = false;
 		}
+		if (spaceshipStats.o2 <= 0) {
+			this.finished = true;
+			LevelManager.instance.loseLevel('OUT_OF_OXYGEN');
+		}
+		if (spaceshipStats.o2 >= 40) {
+			this.finished = true;
+			LevelManager.instance.loseLevel('OXYGEN_EXPLODES');
+		}
+
 
 		if (spaceshipStats.fuel <= 0) {
 			// TODO: out of fuel
-		}
-		if (spaceshipStats.distanceLeft <= 500) {
-			// TODO: landing sequence
+			this.finished = true;
+			LevelManager.instance.loseLevel('OUT_OF_FUEL');
 		}
 		if (spaceshipStats.fuelOnFloor > 100) {
 			// TODO: raise fuel spill warning
 		}
 		if (spaceshipStats.fuelOnFloor > 200) {
 			// TODO: fuel explodes
+			this.finished = true;
+			LevelManager.instance.loseLevel('FUEL_EXPLODES');
 		}
 		if (spaceshipStats.water === 0) {
 			// TODO: start thrist damage

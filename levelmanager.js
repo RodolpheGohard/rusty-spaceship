@@ -28,19 +28,27 @@ export class LevelManager {
 		this.scene.start('HudScene');
 		this.scene.getScene('HudScene').scene.bringToTop();
 		this.scene.stop('IntroScene'+this.currentLevel);
+		this.scene.remove('IntroScene'+this.currentLevel);
 	}
 
 	winLevel() {
 		this.scene.start('WinScene');
 		this.scene.stop('MainGameScene'+this.currentLevel);
+		this.scene.remove('MainGameScene'+this.currentLevel);
 		this.scene.stop('HudScene');
-
 	}
 
 	nextLevel() {
 		console.log('nextLevel');
 		this.currentLevel++;
 		this.playIntro();
+	}
+
+	loseLevel(cause) {
+		this.scene.start('LoseScene', cause);
+		this.scene.stop('MainGameScene'+this.currentLevel);
+		this.scene.remove('MainGameScene'+this.currentLevel);
+		this.scene.stop('HudScene');
 	}
 }
 

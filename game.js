@@ -5,6 +5,7 @@ import HudScene from "./hudscene.js";
 import TitleScene from "./titleScene.js";
 import WinScene from "./winScene.js";
 import {LevelManager} from "./levelmanager.js";
+import LoseScene from "./loseScene.js";
 
 
 const config = {
@@ -25,7 +26,7 @@ const config = {
 		// width: 640,
 		// height: 960
 	},
-	scene: [TitleScene, /*IntroScene, MainGameScene,*/ HudScene, WinScene] // Others scene dynamically loaded by LevelManager
+	scene: [TitleScene, /*IntroScene, MainGameScene,*/ HudScene, WinScene, LoseScene] // Others scene dynamically loaded by LevelManager
 	// scene: {
 	// 	preload: preload,
 	// 	create: create,
