@@ -4,13 +4,13 @@ export const LEVEL_DATA = [
 	{
 		levelName: 'Your First Ride',
 		spaceshipStats: {
-			fuel: 3000,
+			fuel: 1500,
 			fuelOnFloor: 0,
 			water: 1000,
 			waterOnFloor: 0,
 			pilotHealth: 100,
 			pilotDeviation: 0,
-			distanceLeft: 140000,
+			distanceLeft: 60000,
 			o2: 22
 		},
 		failureProbabilities: {
@@ -18,7 +18,7 @@ export const LEVEL_DATA = [
 			chair: 1 / 40,
 			o2Recycler: 0,
 			powerGenerator: 0,
-			engineTop: 1 / 60,
+			topEngine: 1 / 20,
 			spaceTimeFolder: 0
 		},
 		storylines: [
@@ -48,12 +48,12 @@ export const LEVEL_DATA = [
 			pilotHealth: 100,
 			pilotDeviation: 0,
 			distanceLeft: 140000,
-			o2: 20
+			o2: 10
 		},
 		failureProbabilities: {
 			fuelTank: 1 / 120,
 			chair: 1 / 40,
-			o2Recycler: 0,
+			o2Recycler: 1/100,
 			powerGenerator: 0,
 			topEngine: 1 / 60,
 			middleEngine: 1 / 60,
@@ -132,6 +132,7 @@ export const LEVEL_DATA = [
 			"So, uh. What's next?",
 			"Should we continue ..?",
 			"To infinity, and see what happens ?",
+			"Well, the developper hasn't even finished the game and you more ? ok, bye",
 			"(spoiler: nothing special will)",
 		]
 	}

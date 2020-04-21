@@ -24,7 +24,6 @@ export default class WinScene extends Phaser.Scene {
 	}
 
 	preload() {
-		console.log('preloading winScene');
 		this.load.image('spaceshipExterior', 'assets/spaceship-exterior.png');
 		this.load.image('engine', 'assets/engine.png');
 		this.load.image('wall', 'assets/wall.png');
