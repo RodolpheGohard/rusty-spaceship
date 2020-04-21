@@ -33,7 +33,6 @@ document.addEventListener('click',  () => {
 	motorSound.setVolume(.2);
 });
 
-// TODO: not needed anymore, since in level data
 
 class Score {
 	get total() {
@@ -45,26 +44,25 @@ class Score {
 		this[success] += score;
 	}
 }
-
 export const spaceshipStats = {
 	score: new Score(),
-	fuel: 3000,
-	fuelOnFloor: 0,
-	water: 2000,
-	waterOnFloor: 0,
-	pilotHealth: 100,
-	pilotDeviation: 0,
-	distanceLeft: 140000,
-	o2: 20
+	// fuel: 3000,
+	// fuelOnFloor: 0,
+	// water: 2000,
+	// waterOnFloor: 0,
+	// pilotHealth: 100,
+	// pilotDeviation: 0,
+	// distanceLeft: 140000,
+	// o2: 20
 };
 /* probabilities for each interactive to fail, in one second */
 export const failureProbabilities = {
-	fuelTank: 1/120,
-	chair: 1/40,
-	o2Recycler: 1/200,
-	powerGenerator: 1/100,
-	topEngine: 1/60,
-	spaceTimeFolder: 1/400
+	// fuelTank: 1/120,
+	// chair: 1/40,
+	// o2Recycler: 1/200,
+	// powerGenerator: 1/100,
+	// topEngine: 1/60,
+	// spaceTimeFolder: 1/400
 };
 
 let timState = "STAND";
@@ -81,6 +79,8 @@ class MainGameScene extends Phaser.Scene {
 	}
 
 	preload() {
+		this.load.audio('success', ['assets/success-ding.mp3'/*, 'assets/ok.ogg'*/]);
+
 		this.load.image('spaceship', 'assets/spaceship.png');
 		this.load.image('engine', 'assets/engine.png');
 		this.load.image('wall', 'assets/wall.png');
@@ -91,24 +91,18 @@ class MainGameScene extends Phaser.Scene {
 		this.load.image('smoke', 'assets/smoke.png');
 		this.load.image('drop', 'assets/drop.png');
 		this.load.image('successStar', 'assets/star.png');
-
-
-		this.load.audio('rusty-spaceship', ['assets/JohnDuff - Rusty Spaceship (original).mp3'/*, 'assets/audio/bodenstaendig_2000_in_rock_4bit.ogg'*/]);
-
 	}
 
 	create() {
-		const music = this.sound.add('rusty-spaceship', {
+		this.successSound = this.sound.add('success', {
 			mute: false,
 			volume: 1,
 			rate: 1,
 			detune: 0,
 			seek: 0,
-			loop: true,
+			loop: false,
 			delay: 0
 		});
-
-		// music.play();
 
 		const spaceship = this.add.image(WIDTH/2, HEIGHT/2, 'spaceship');
 
@@ -652,6 +646,8 @@ class MainGameScene extends Phaser.Scene {
 	repairSuccess(activeInteractive) {
 		const bonusScore = 10;
 		spaceshipStats.score.markScore('REPAIR_SUCCESS', 10);
+
+		this.successSound.play();
 
 		this.repairSuccessParticlesEmitter.explode(5,activeInteractive.x, activeInteractive.y);
 

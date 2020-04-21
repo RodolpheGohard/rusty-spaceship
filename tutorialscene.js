@@ -24,8 +24,20 @@ export default class TutorialScene extends Phaser.Scene {
 		this.score = 0;
 	}
 
-	create() {
+	preload() {
+		this.load.audio('ok', ['assets/ok.mp3'/*, 'assets/ok.ogg'*/]);
+	}
 
+	create() {
+		this.okSound = this.sound.add('ok', {
+			mute: false,
+			volume: 1,
+			rate: 1,
+			detune: 0,
+			seek: 0,
+			loop: false,
+			delay: 0
+		});
 
 		const graphics = this.add.graphics({
 			x: 0,
@@ -63,6 +75,7 @@ export default class TutorialScene extends Phaser.Scene {
 		this.tutorial.setText(this.storylines[this.currentStoryLine])
 
 		if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
+			this.okSound.play();
 			this.currentStoryLine++;
 		}
 
