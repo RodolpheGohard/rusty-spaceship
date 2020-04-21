@@ -1,5 +1,6 @@
 import {LEVEL_DATA} from "./leveldata.js";
 import {LevelManager} from "./levelmanager.js";
+import {WIDTH,HEIGHT} from "./constants.js";
 
 export default class IntroScene extends Phaser.Scene {
 
@@ -18,6 +19,8 @@ export default class IntroScene extends Phaser.Scene {
 	create() {
 		this.subtitle = this.add.text(1000, 700, this.storylines[this.currentStoryLine], {font: '45px Courier', fill: 'white', backgroundColor: 'black'}).setOrigin(0.5);
 		this.presEsc = this.add.text(1000, 800, 'esc to skip', {font: '30px Courier', fill: 'white', backgroundColor: 'black'}).setOrigin(0.5);
+
+		this.levelName = this.add.text(1000, 980, `Level #${LevelManager.instance.currentLevel} - ${this.levelData.levelName}`, {font: '95px Courier', fill: 'white', backgroundColor: 'black'}).setOrigin(0.5);
 
 		// this.cursors = this.input.keyboard.createCursorKeys();
 		this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
