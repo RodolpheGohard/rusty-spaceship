@@ -648,12 +648,16 @@ class MainGameScene extends Phaser.Scene {
 		} else if (this.cursors.down.isDown && canClimb) {
 			this.stateAction("CLIMB_DOWN");
 			tim.setVelocityY(CLIMB_VELOCITY);
+			tim.setVelocityX(0);
 			tim.anims.play('climb', true);
 		} else if (this.cursors.up.isDown && canClimb) {
 			this.stateAction("CLIMB_UP");
 			tim.setVelocityY(-CLIMB_VELOCITY);
+			tim.setVelocityX(0);
 			tim.anims.play('climb', true);
 		} else if (this.cursors.space.isDown) {
+			tim.setVelocityX(0);
+			tim.setVelocityY(0);
 			// check interactive
 			if (activeInteractive) {
 				if (activeInteractive.progress < 100) {
