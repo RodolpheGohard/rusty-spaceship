@@ -109,15 +109,40 @@ class MainGameScene extends Phaser.Scene {
 
 		/* Creatings walls and platforms on the plane */
 		const platforms = this.physics.add.staticGroup();
-		// grounds
-		platforms.create(950, 120, 'wall').setScale(110,1).refreshBody();
-		platforms.create(950, 310, 'wall').setScale(110,1).refreshBody();
-		platforms.create(950, 500, 'wall').setScale(110,1).refreshBody();
-		platforms.create(950, 690, 'wall').setScale(110,1).refreshBody();
-		// walls
-		platforms.create(400, 360, 'wall').setScale(1, 80).refreshBody();
-		platforms.create(1460, 360, 'wall').setScale(1, 80).refreshBody();
-		platforms.create(1220, 160, 'wall').setScale(1, 30).refreshBody();
+		function createWall(x,y,w,h) {
+			const testBody = platforms.create(x,y);
+			// Circumvent all those annoying stuff phaser does with centering things without your consent
+			testBody.setOrigin(0);
+			testBody.refreshBody();
+			testBody.body.setSize(w,h);
+			testBody.body.setOffset(0);
+			testBody.setPosition(x,y);
+		}
+
+		/* grounds */
+		// Celing
+		createWall(400,120,820,2);
+		//Top floor
+		createWall(400,315,665,2);
+		createWall(1200,315,250,2);
+		//Middle floor
+		createWall(400,490,665,2);
+		createWall(1200,485,250,2);
+		//Bottom floor
+		createWall(400,690,1070,2);
+
+		/* walls */
+		//Back of ship = left wall
+		createWall(405,120, 2, 580);
+		//Top floor right wall
+		createWall(1220,120, 2, 200);
+		// Bottom and middle right wall
+		createWall(1460,320, 2, 380);
+
+
+		// platforms.create(400, 360, 'wall').setScale(1, 80).refreshBody();
+		// platforms.create(1460, 360, 'wall').setScale(1, 80).refreshBody();
+		// platforms.create(1220, 160, 'wall').setScale(1, 30).refreshBody();
 		platforms.setVisible(false);
 		this.platforms = platforms;
 
@@ -372,7 +397,7 @@ class MainGameScene extends Phaser.Scene {
 			canClimb = true;
 		});
 
-		if (timState !== 'CLIMB')
+		// if (timState !== 'CLIMB')
 			this.physics.collide(tim, this.platforms);
 
 
