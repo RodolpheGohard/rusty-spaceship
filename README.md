@@ -28,9 +28,10 @@ Known bugs:
 * ~~diagonal movement around ladders can get quirky~~
 * ~~engine sound doesn’t quit properly on level end~~
 * ~~engine sound may not start if user has not clicked on the page since load~~
-* Music playing twice at level 2 end
+* ~~Music playing twice at level 2 end~~
 * ~~Clipping through walls sometimes ???~~
 * ~~Repair animation not properly anchored~~
+* ~~Bad screen sizing~~
 * Piano/Keys Track in the music are not in Sync (bandlab support ticket ongoing)
 
 
