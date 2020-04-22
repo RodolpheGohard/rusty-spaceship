@@ -85,7 +85,14 @@ class MainGameScene extends Phaser.Scene {
 		this.load.image('engine', 'assets/engine.png');
 		this.load.image('wall', 'assets/wall.png');
 		this.load.image('pilot', 'assets/pilot.png');
-		this.load.multiatlas('tim', 'assets/tim/tim.json', 'assets/tim');
+
+		// this.load.multiatlas('tim', 'assets/tim/tim.json', 'assets/tim');
+		// can't get texture packer and phaser 3 to work properly, switching to good ol image magick:
+		// Command is `montage -mode concatenate -background none -resize 50% -tile 1x *.png out.png`
+		this.load.spritesheet('timagemagick', 'assets/out.png', {
+			frameWidth: 400/2,
+			frameHeight: 536/2
+		});
 
 		// particles
 		this.load.image('smoke', 'assets/smoke.png');
@@ -147,7 +154,7 @@ class MainGameScene extends Phaser.Scene {
 		this.platforms = platforms;
 
 
-		const actualFrameNames = Object.keys(this.anims.textureManager.get('tim').frames).slice(1);
+		// const actualFrameNames = Object.keys(this.anims.textureManager.get('tim').frames).slice(1);
 
 		// Try to cheat moving body bug
 		// Object.values(this.anims.textureManager.get('tim').frames).forEach(frame => {
@@ -157,40 +164,47 @@ class MainGameScene extends Phaser.Scene {
 		// 	frame.pivotY = 116;
 		// });
 
-		function framesForAnimCreate(framenames) {
-			return framenames.map(frameName => ({ key: 'tim', frame: frameName }))
-		}
+		// function framesForAnimCreate(framenames) {
+		// 	return framenames.map(frameName => ({ key: 'tim', frame: frameName }))
+		// }
+
+		const frames = this.anims.generateFrameNumbers('timagemagick');
+
+
 
 		/* Anims for Tim */
 		this.anims.create({
 			key: 'walk',
-			frames: actualFrameNames.map(frameName => ({key: 'tim', frame: frameName})).slice(6).reverse(),
+			frames: frames.slice(6).reverse(),
+			// frames: actualFrameNames.map(frameName => ({key: 'tim', frame: frameName})).slice(6).reverse(),
 			frameRate: 9,
 			repeat: -1
 		});
 		this.anims.create({
 			key: 'stand',
-			frames: [{key: 'tim', frame: actualFrameNames[14]}],
+			frames: [frames[14]],
+			// frames: [{key: 'tim', frame: actualFrameNames[14]}],
 			frameRate: 7,
 			repeat: -1
 		});
 		this.anims.create({
-			key: 'climb', frames: framesForAnimCreate(actualFrameNames.slice(2, 6)),
+			key: 'climb', frames: frames.slice(2, 6),
+			// key: 'climb', frames: framesForAnimCreate(actualFrameNames.slice(2, 6)),
 			frameRate: 4,
 			repeat: -1
 		});
 		this.anims.create({
 			key: 'work',
-			frames: framesForAnimCreate(actualFrameNames.slice(0, 2)),
+			frames: frames.slice(0, 2),
+			// frames: framesForAnimCreate(actualFrameNames.slice(0, 2)),
 			frameRate: 4,
 			repeat: -1
 		});
 
 		/* TIM */
-		const tim = this.physics.add.sprite(WIDTH/2-500, HEIGHT/2-125, 'tim');
+		const tim = this.physics.add.sprite(WIDTH/2-400, HEIGHT/2-145, 'timagemagick');
 
 		tim.body.setSize(131,232);
-		tim.setX(WIDTH/2+100); //cheat
 		tim.setScale(0.55); //.refreshBody();
 		tim.enableBody();
 		// tim.anims.play('walk');
