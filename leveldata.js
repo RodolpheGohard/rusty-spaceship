@@ -47,7 +47,7 @@ export const LEVEL_DATA = [
 			waterOnFloor: 0,
 			pilotHealth: 100,
 			pilotDeviation: 0,
-			distanceLeft: 140000,
+			distanceLeft: 110000,
 			o2: 10
 		},
 		failureProbabilities: {

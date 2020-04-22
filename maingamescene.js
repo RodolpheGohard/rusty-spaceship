@@ -574,8 +574,6 @@ class MainGameScene extends Phaser.Scene {
 		// scene.topEngine.particlesEmitter.setSpeed(400 * scene.topEngine.progress/100);
 		particleEmitter.setSpeed({ min: 200* thrust, max: 600* this.topEngine.progress/100 });
 		particleEmitter.setScale({ start: 2+5* thrust, end: 0 });
-		// scene.topEngine.particlesEmitter.setTint(0xff6666)
-		// scene.topEngine.particlesEmitter.setLifespan(1000 * scene.topEngine.progress/100);
 	}
 
 	runCatastrophePlanner(delta) {
