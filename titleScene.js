@@ -33,7 +33,7 @@ export default class TitleScene extends Phaser.Scene {
 			this.scene.start('WinScene');
 			this.scene.stop();
 		} else if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
-			// this.scene.start('IntroScene', LEVEL_DATA[0]);
+			this.scene.get('MusicScene').play();
 			this.scene.stop();
 			LevelManager.instance.playIntro();
 		}

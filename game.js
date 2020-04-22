@@ -7,6 +7,7 @@ import WinScene from "./winScene.js";
 import {LevelManager} from "./levelmanager.js";
 import LoseScene from "./loseScene.js";
 import TutorialScene from "./tutorialscene.js";
+import MusicScene from "./musicscene.js";
 
 
 const config = {
@@ -27,12 +28,7 @@ const config = {
 		// width: 640,
 		// height: 960
 	},
-	scene: [TitleScene, /*IntroScene, MainGameScene,*/ HudScene, TutorialScene, WinScene, LoseScene] // Others scene dynamically loaded by LevelManager
-	// scene: {
-	// 	preload: preload,
-	// 	create: create,
-	// 	update: update
-	// }
+	scene: [TitleScene, MusicScene, /*IntroScene, MainGameScene,*/ HudScene, TutorialScene, WinScene, LoseScene] // Others scene dynamically loaded by LevelManager
 };
 
 const game = new Phaser.Game(config);

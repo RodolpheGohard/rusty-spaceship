@@ -28,23 +28,9 @@ export default class WinScene extends Phaser.Scene {
 		this.load.image('engine', 'assets/engine.png');
 		this.load.image('wall', 'assets/wall.png');
 		this.load.image('road', 'assets/road.png');
-
-		this.load.audio('rusty-spaceship', ['assets/JohnDuff - Rusty Spaceship (original).mp3'/*, 'assets/audio/bodenstaendig_2000_in_rock_4bit.ogg'*/]);
 	}
 
 	create() {
-
-		const music = this.sound.add('rusty-spaceship', {
-			mute: false,
-			volume: 1,
-			rate: 1,
-			detune: 0,
-			seek: 0,
-			loop: true,
-			delay: 0
-		});
-
-		music.play();
 
 		this.time.addEvent({ delay: 8000, callback: () => {
 			// this.subtitle.setVisible(true);
