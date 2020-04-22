@@ -9,29 +9,32 @@ const CATASTROPHE_CHAIN_DELAY = 3000;
 const WALK_VELOCITY = 270;
 const CLIMB_VELOCITY = 170;
 const CHEAT_DISTANCE_MULTIPLIER = 1;
+const DISTANCE_TO_WIN = 300;
 
-let motorSound;
-document.addEventListener('click',  () => {
-	if (motorSound) {
-		return;
-	}
-	const AudioContext = window.AudioContext || window.webkitAudioContext;
-	const context = new AudioContext();
-	const generators = [
-		new MotorSound.NoiseGenerator(),
-		new MotorSound.LinearGenerator()
-	];
-	motorSound = new MotorSound(context, generators[0]);
-	window.motorSound = motorSound;
-	function regenerateSound() {
-		motorSound.regenerate();
-		// motorSound.start();
-	}
-	regenerateSound();
+const MotorSoundFactory = {
+	initContext: function() {
+		const AudioContext = window.AudioContext || window.webkitAudioContext;
+		this.context = new AudioContext();
+		this.generators = [
+			new MotorSound.NoiseGenerator(),
+			new MotorSound.LinearGenerator()
+		];
+	},
 
-	motorSound.setSpeed(.32);
-	motorSound.setVolume(.2);
-});
+	createMotorSound: function() {
+		const motorSound = new MotorSound(this.context, this.generators[0]);
+		function regenerateSound() {
+			motorSound.regenerate();
+		}
+		regenerateSound();
+
+		motorSound.setSpeed(.32);
+		motorSound.setVolume(.2);
+
+		return motorSound
+	}
+
+};
 
 
 class Score {
@@ -76,6 +79,8 @@ class MainGameScene extends Phaser.Scene {
 	init(levelData) {
 		Object.assign(spaceshipStats, levelData.spaceshipStats);
 		Object.assign(failureProbabilities, levelData.failureProbabilities);
+
+		MotorSoundFactory.initContext();
 	}
 
 	preload() {
@@ -263,6 +268,8 @@ class MainGameScene extends Phaser.Scene {
 		this.repairSuccessTooltip.setVisible(false);
 
 		this.cursors = this.input.keyboard.createCursorKeys();
+		this.F7 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F7);
+
 		this.player = tim;
 
 		this.cameras.main.zoom = 1.5;
@@ -285,6 +292,7 @@ class MainGameScene extends Phaser.Scene {
 		engine.interactiveText = text;
 		this[name] = engine;
 
+		// Flame trail
 		const particles = this.add.particles('wall');
 		engine.particlesEmitter = particles.createEmitter({
 			// frame: 'blue',
@@ -304,6 +312,8 @@ class MainGameScene extends Phaser.Scene {
 			blendMode: 'ADD'
 		});
 		engine.particles = particles;
+
+		engine.motorSound = MotorSoundFactory.createMotorSound();
 	}
 
 	createRepairParticles() {
@@ -392,7 +402,7 @@ class MainGameScene extends Phaser.Scene {
 		});
 
 
-		const thrust = spaceshipStats.fuel>0 ? (this.topEngine.progress / 100) : 0;
+		const thrust = this.getThrust(this.topEngine);
 
 		this.updateSpaceshipStats(delta, thrust);
 
@@ -429,6 +439,10 @@ class MainGameScene extends Phaser.Scene {
 		this.updateGoals();
 
 
+	}
+
+	getThrust(engine) {
+		return spaceshipStats.fuel > 0 ? (engine.progress / 100) : 0;
 	}
 
 	updateCamera() {
@@ -506,14 +520,23 @@ class MainGameScene extends Phaser.Scene {
 		if (spaceshipStats.water === 0) {
 			// TODO: start thrist damage
 		}
-		if (spaceshipStats.distanceLeft < 300) {
-			motorSound && motorSound.stop(); // TODO: schedule something aftewerards is probably still running
+		if (spaceshipStats.distanceLeft < DISTANCE_TO_WIN) {
+			this.stopEngineSounds();
 			// this.scene.start('WinScene');
 			// this.scene.stop('GameScene');
 			// this.scene.stop('HudScene');
 			this.finished = true;
 			LevelManager.instance.winLevel();
 
+		}
+	}
+
+	stopEngineSounds() {
+		for (let engine of [this.topEngine, this.middleEngine, this.bottomEngine]) {
+			setTimeout( () => {
+				// setting a timeout to avoid motorSound between reactivated by update loop (and gamescene not finished)
+				engine.motorSound && engine.motorSound.stop();
+			}, 1000);
 		}
 	}
 
@@ -526,21 +549,20 @@ class MainGameScene extends Phaser.Scene {
 		}
 	}
 
-	updateEngineSound(thrust) {
-		if (!motorSound) {
-			// audio context and stuff may not be initialized - chrome forbids it without user interaction
-			return;
+	updateEngineSound() {
+		for (let engine of [this.topEngine, this.middleEngine, this.bottomEngine]) {
+			let distance = Math.max(1, Phaser.Math.Distance.Between(this.player.x, this.player.y, engine.x, engine.y) / 50); // Setting min distance of 1 to not let sound explode when getting closer than 1
+			let thrust = this.getThrust(engine);
+
+			if (distance >= DISTANCE_TO_WIN || thrust === 0) {
+				engine.motorSound.stop();
+			} else {
+				engine.motorSound.start();
+			}
+			let volume = .17 * (1 / (distance * distance));
+			engine.motorSound.setSpeed(.82 * thrust);
+			engine.motorSound.setVolume(volume);
 		}
-		motorSound.setSpeed(.52*thrust);
-		let distance = Math.max(1, Phaser.Math.Distance.Between(this.player.x, this.player.y, this.topEngine.x, this.topEngine.y)/50);
-		if (distance > 10 || thrust == 0) {
-			motorSound.stop();
-		} else {
-			motorSound.start();
-		}
-		let volume = .2*(1/(distance*distance));
-		motorSound.setVolume(volume );
-		// console.log(volume, distance);
 	}
 
 	updateEngineParticles(thrust) {
@@ -635,6 +657,7 @@ class MainGameScene extends Phaser.Scene {
 	processPlayerAction(canClimb, activeInteractive) {
 		const tim = this.player;
 
+		// TODO: do a proper FSM and do the reset velocity instructions on enter state
 		if (this.cursors.left.isDown) {
 			this.stateAction("WALK_LEFT");
 			tim.setVelocityX(-WALK_VELOCITY);
@@ -682,6 +705,11 @@ class MainGameScene extends Phaser.Scene {
 			tim.setVelocityY(0);
 
 			tim.anims.play('stand');
+		}
+
+		// Cheats
+		if (Phaser.Input.Keyboard.JustDown(this.F7)) {
+			spaceshipStats.distanceLeft *= 2/3;
 		}
 
 	}
