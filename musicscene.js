@@ -10,7 +10,7 @@ export default class MusicScene extends Phaser.Scene {
 	}
 
 	preload() {
-		this.load.audio('rusty-spaceship', ['assets/JohnDuff - Rusty Spaceship (original).mp3'/*, 'assets/audio/bodenstaendig_2000_in_rock_4bit.ogg'*/]);
+		this.load.audio('rusty-spaceship', ['assets/rusty-spaceship-newlmms.mp3', 'assets/rusty-spaceship-newlmms.ogg']);
 	}
 
 	create() {
@@ -23,7 +23,6 @@ export default class MusicScene extends Phaser.Scene {
 			loop: true,
 			delay: 30
 		});
-
 	}
 
 	play() {
